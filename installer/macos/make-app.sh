@@ -27,6 +27,14 @@ if [ -n "${CODESIGN_IDENTITY:-}" ]; then
       -s "$CODESIGN_IDENTITY" "$APP"
     codesign --verify --deep --strict "$APP"
   fi
+elif [ "$(uname -s)" = Darwin ]; then
+  # No Developer ID: ad-hoc sign the whole bundle. Without a sealed signature a downloaded (quarantined)
+  # app is reported as "damaged" by Gatekeeper; ad-hoc signed it only needs right-click > Open once.
+  echo "-- codesign (ad-hoc)"
+  find "$APP/Contents/MacOS" -type f \( -name '*.dylib' -o -name '*.so' \) -print0 | xargs -0 -n1 codesign --force -s -
+  codesign --force -s - "$APP/Contents/MacOS/Ddt4All.App"
+  codesign --force --deep -s - "$APP"
+  codesign --verify --deep --strict --verbose=2 "$APP"
 fi
 
 OUT="$ART/DDT4All-$VER-$RID.app.zip"; rm -f "$OUT"
