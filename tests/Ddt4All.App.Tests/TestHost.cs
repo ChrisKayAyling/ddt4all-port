@@ -82,7 +82,7 @@ internal sealed class TestApp : IDisposable
         return path;
     }
 
-    private static string FindScreenshotDir()
+    internal static string FindScreenshotDir()
     {
         var d = new DirectoryInfo(AppContext.BaseDirectory);
         while (d is not null && !File.Exists(Path.Combine(d.FullName, "Ddt4All.sln"))) d = d.Parent;

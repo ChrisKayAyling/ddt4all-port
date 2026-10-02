@@ -1,0 +1,738 @@
+[
+{
+"code": "ALMERA",
+"name": "Nissan Almera"
+},
+{
+"code": "AS1",
+"name": "Alpine A110"
+},
+{
+"code": "DZ110",
+"name": "Alpine DZ110"
+},
+{
+"code": "EDISON",
+"name": "Daimler Smart"
+},
+{
+"code": "H45",
+"name": "Rsm Koleos"
+},
+{
+"code": "HFEPH2",
+"name": "Renault Kadjar Ph2"
+},
+{
+"code": "HFE",
+"name": "Renault Kadjar"
+},
+{
+"code": "J32V",
+"name": "Nissan J32V"
+},
+{
+"code": "KJA",
+"name": "Rsm KJA"
+},
+{
+"code": "L21B",
+"name": "Nissan Note"
+},
+{
+"code": "LZ2A",
+"name": "Nissan New EV SWEET400"
+},
+{
+"code": "MARCH",
+"name": "Nissan March-Micra"
+},
+{
+"code": "NOVA",
+"name": "Dacia Nova"
+},
+{
+"code": "P13C",
+"name": "Nissan Captur II"
+},
+{
+"code": "P32",
+"name": "Nissan P32"
+},
+{
+"code": "P33A",
+"name": "Nissan P33A"
+},
+{
+"code": "P33B",
+"name": "Nissan P33B"
+},
+{
+"code": "P42Q",
+"name": "Nissan P42Q"
+},
+{
+"code": "P42R",
+"name": "Nissan P42R"
+},
+{
+"code": "PRIMERA",
+"name": "Nissan Primera"
+},
+{
+"code": "PY1B",
+"name": "Nissan PY1B"
+},
+{
+"code": "PZ1A",
+"name": "Nissan Leaf"
+},
+{
+"code": "PZ1C",
+"name": "Nissan PZ1C"
+},
+{
+"code": "RF90",
+"name": "Lada Largus"
+},
+{
+"code": "RM2B1",
+"name": "Renault C-EV B1"
+},
+{
+"code": "RM2H1",
+"name": "Renault C-EV H1"
+},
+{
+"code": "RM2L1",
+"name": "Renault C-EV L1"
+},
+{
+"code": "U60",
+"name": "Renault Alaskan Nissan"
+},
+{
+"code": "VS10",
+"name": "Daimler Citan"
+},
+{
+"code": "VS11",
+"name": "Daimler Citan II"
+},
+{
+"code": "W176",
+"name": "Daimler w176"
+},
+{
+"code": "W205",
+"name": "Daimler w205"
+},
+{
+"code": "X02E",
+"name": "Nissan Micra"
+},
+{
+"code": "X06",
+"name": "Renault Twingo I"
+},
+{
+"code": "X07PH2",
+"name": "Renault Twingo III Ph2"
+},
+{
+"code": "X07",
+"name": "Renault Twingo III"
+},
+{
+"code": "X09",
+"name": "Renault Twizy"
+},
+{
+"code": "X10PH2",
+"name": "Renault Zoe C1A-Neo"
+},
+{
+"code": "X10",
+"name": "Renault Zoe"
+},
+{
+"code": "X1310",
+"name": "Dacia Duster II"
+},
+{
+"code": "X1312",
+"name": "Dacia Kaptur II"
+},
+{
+"code": "X1316A",
+"name": "Alpine ECHO"
+},
+{
+"code": "X1316",
+"name": "Renault R5 (EV)"
+},
+{
+"code": "X1317",
+"name": "Renault 4Ever (EV)"
+},
+{
+"code": "X1318",
+"name": "Renault New Clio"
+},
+{
+"code": "X1320",
+"name": "Dacia C-NEO"
+},
+{
+"code": "X1322",
+"name": "Renault Compact EV for Nissan"
+},
+{
+"code": "X1324",
+"name": "Renault Kaptur III Duster III India"
+},
+{
+"code": "X1325",
+"name": "Renault Twingo IV"
+},
+{
+"code": "X1326",
+"name": "Partners Twingo IV"
+},
+{
+"code": "X1327",
+"name": "Dacia Logan / Sandero"
+},
+{
+"code": "X13A",
+"name": "Nissan Juke"
+},
+{
+"code": "X21B",
+"name": "Nissan Note"
+},
+{
+"code": "X24",
+"name": "Renault Mascott"
+},
+{
+"code": "X33",
+"name": "Renault Wind"
+},
+{
+"code": "X35",
+"name": "Renault Symbol / Thalia"
+},
+{
+"code": "X38",
+"name": "Renault Fluence"
+},
+{
+"code": "X43",
+"name": "Renault Latitude"
+},
+{
+"code": "X44PH2",
+"name": "Renault Twingo II Ph2"
+},
+{
+"code": "X44",
+"name": "Renault Twingo II"
+},
+{
+"code": "X47",
+"name": "Renault Laguna III Tricorps"
+},
+{
+"code": "X52",
+"name": "Dacia Logan"
+},
+{
+"code": "X54",
+"name": "Renault Safrane"
+},
+{
+"code": "X56",
+"name": "Renault Laguna"
+},
+{
+"code": "X60A",
+"name": "Nissan Navarra"
+},
+{
+"code": "X60B",
+"name": "Daimler Andrew"
+},
+{
+"code": "X61PH2",
+"name": "Renault Kangoo II Ph2"
+},
+{
+"code": "X61",
+"name": "Renault Kangoo II"
+},
+{
+"code": "X62PH2",
+"name": "Renault Master III Ph2"
+},
+{
+"code": "X62",
+"name": "Renault Master III"
+},
+{
+"code": "X64",
+"name": "Renault Scenic I"
+},
+{
+"code": "X65",
+"name": "Renault Clio II"
+},
+{
+"code": "X66",
+"name": "Renault Avantime"
+},
+{
+"code": "X67",
+"name": "Dacia Docker"
+},
+{
+"code": "X70PH3",
+"name": "Renault Master II Ph3"
+},
+{
+"code": "X70",
+"name": "Renault Master II"
+},
+{
+"code": "X73PH2",
+"name": "Renault VelSatis Ph2"
+},
+{
+"code": "X73",
+"name": "Renault VelSatis"
+},
+{
+"code": "X74PH2",
+"name": "Renault Laguna II Ph2"
+},
+{
+"code": "X74",
+"name": "Renault Laguna II"
+},
+{
+"code": "X76",
+"name": "Renault Kangoo"
+},
+{
+"code": "X77PH2",
+"name": "Renault Modus Ph2"
+},
+{
+"code": "X77",
+"name": "Renault Modus"
+},
+{
+"code": "X79PH2",
+"name": "Dacia Duster Ph2"
+},
+{
+"code": "X79",
+"name": "Dacia Duster"
+},
+{
+"code": "X81PH2",
+"name": "Renault Espace IV Ph2"
+},
+{
+"code": "X81PH3",
+"name": "Renault Espace IV Ph3"
+},
+{
+"code": "X81PH4",
+"name": "Renault Espace IV Ph4"
+},
+{
+"code": "X81",
+"name": "Renault Espace IV"
+},
+{
+"code": "X82PH2",
+"name": "Renault Trafic III Ph2"
+},
+{
+"code": "X82PH3",
+"name": "Renault Trafic III Ph3"
+},
+{
+"code": "X82",
+"name": "Renault Trafic III"
+},
+{
+"code": "X8310",
+"name": "Renault FlexEVan Sweet500"
+},
+{
+"code": "X8311",
+"name": "Renault FlexEVanII Sweet500"
+},
+{
+"code": "X83PH2",
+"name": "Renault Trafic II Ph2"
+},
+{
+"code": "X83PH3",
+"name": "Renault Trafic II Ph3"
+},
+{
+"code": "X83",
+"name": "Renault Trafic II"
+},
+{
+"code": "X84ABSONLY",
+"name": "Renault Megane II ABS"
+},
+{
+"code": "X84BUGABS",
+"name": "Renault Megane II noABS"
+},
+{
+"code": "X84PH2",
+"name": "Renault Megane II Ph2"
+},
+{
+"code": "X84",
+"name": "Renault Megane II"
+},
+{
+"code": "X85",
+"name": "Renault Clio III"
+},
+{
+"code": "X87PH2",
+"name": "Renault Captur Ph2"
+},
+{
+"code": "X87",
+"name": "Renault Captur"
+},
+{
+"code": "X89",
+"name": "Renault X89"
+},
+{
+"code": "X90",
+"name": "Dacia Logan / Sandero"
+},
+{
+"code": "X91PH2",
+"name": "Renault Laguna III Ph2"
+},
+{
+"code": "X91PH3",
+"name": "Renault Laguna III Ph3"
+},
+{
+"code": "X91",
+"name": "Renault Laguna III"
+},
+{
+"code": "X92",
+"name": "Dacia Lodgy"
+},
+{
+"code": "X94",
+"name": "Renault x94"
+},
+{
+"code": "X95PH2",
+"name": "Renault Megane III Ph2"
+},
+{
+"code": "X95",
+"name": "Renault Megane III"
+},
+{
+"code": "X96",
+"name": "Renault X96"
+},
+{
+"code": "X98PH2",
+"name": "Renault Clio IV Ph2"
+},
+{
+"code": "X98",
+"name": "Renault Clio IV"
+},
+{
+"code": "XBA",
+"name": "Renault Kwid"
+},
+{
+"code": "XBB",
+"name": "Renault Kwid BR"
+},
+{
+"code": "XBCPH2",
+"name": "Renault Triber/Kiger Ph2 India"
+},
+{
+"code": "XBC",
+"name": "Renault Triber/Kiger India"
+},
+{
+"code": "XBGPH2",
+"name": "Renault Kwid (EV) Sweet400"
+},
+{
+"code": "XBG",
+"name": "Renault Kwid (EV)"
+},
+{
+"code": "XCBPH2",
+"name": "Renault Megane E-Tech (EV) Sweet400"
+},
+{
+"code": "XCB",
+"name": "Renault Megane E-Tech (EV)"
+},
+{
+"code": "XCC",
+"name": "Renault New EV Sweet400"
+},
+{
+"code": "XCD",
+"name": "Renault New EV China Sweet400"
+},
+{
+"code": "XCOP_BEFORE_C1A",
+"name": "Contrôle Cop Contrôle COP Before C1A"
+},
+{
+"code": "XCOP_C1AHS",
+"name": "Contrôle Cop Contrôle COP C1A HS"
+},
+{
+"code": "XCOP_C1A",
+"name": "Contrôle Cop Contrôle COP C1A"
+},
+{
+"code": "XDC",
+"name": "Renault Master Chine"
+},
+{
+"code": "XDD",
+"name": "Renault Master IV"
+},
+{
+"code": "XDE",
+"name": "Renault Master IV DCabin"
+},
+{
+"code": "XDF",
+"name": "Renault Master IV LATAM"
+},
+{
+"code": "XEF",
+"name": "Renault Alpine A110"
+},
+{
+"code": "XFAPH2",
+"name": "Renault Scenic IV ph2"
+},
+{
+"code": "XFA",
+"name": "Renault Scenic IV"
+},
+{
+"code": "XFBPH2",
+"name": "Renault Megane IV Ph2"
+},
+{
+"code": "XFB",
+"name": "Renault Megane IV"
+},
+{
+"code": "XFCPH2",
+"name": "Renault Espace V Ph2"
+},
+{
+"code": "XFC",
+"name": "Renault Espace V"
+},
+{
+"code": "XFDPH2",
+"name": "Renault Talisman Ph2"
+},
+{
+"code": "XFD",
+"name": "Renault Talisman"
+},
+{
+"code": "XFFPH2",
+"name": "Renault Megane IV Sedan Ph2"
+},
+{
+"code": "XFF",
+"name": "Renault Megane IV Sedan"
+},
+{
+"code": "XFG",
+"name": "Renault xFG"
+},
+{
+"code": "XFI",
+"name": "Renault C-Hatch China C1A"
+},
+{
+"code": "XFJ",
+"name": "Renault (x38_Chine)"
+},
+{
+"code": "XFK",
+"name": "Renault Kangoo III"
+},
+{
+"code": "XGA",
+"name": "Dacia BM Lada"
+},
+{
+"code": "XGF",
+"name": "Lada Vesta"
+},
+{
+"code": "XHAPH2",
+"name": "Dacia Kaptur - Captur Ph2"
+},
+{
+"code": "XHA",
+"name": "Dacia Kaptur - Captur"
+},
+{
+"code": "XHC",
+"name": "Renault (SUV)Chine"
+},
+{
+"code": "XHNPH2",
+"name": "Renault Austral/Rafale Ph2 Sweet400"
+},
+{
+"code": "XHN",
+"name": "Renault Austral/Rafale"
+},
+{
+"code": "XJAPH2",
+"name": "Renault Clio C1A Ph2"
+},
+{
+"code": "XJA",
+"name": "Renault Clio C1A"
+},
+{
+"code": "XJBPH2",
+"name": "Renault Captur II Ph2/Symbioz Sweet400"
+},
+{
+"code": "XJB",
+"name": "Renault Captur II C1A"
+},
+{
+"code": "XJC",
+"name": "Dacia Arkana"
+},
+{
+"code": "XJD",
+"name": "Dacia Duster Ph3"
+},
+{
+"code": "XJE",
+"name": "Renault Captur Chine"
+},
+{
+"code": "XJF",
+"name": "Renault Logan III Renault"
+},
+{
+"code": "XJH",
+"name": "Renault xJH"
+},
+{
+"code": "XJI",
+"name": "Dacia Logan III"
+},
+{
+"code": "XJK",
+"name": "Renault Docker II"
+},
+{
+"code": "XJLPH2",
+"name": "Renault Arkana Ph2"
+},
+{
+"code": "XJL",
+"name": "Renault Arkana"
+},
+{
+"code": "XJN",
+"name": "Lada XJN"
+},
+{
+"code": "XJO",
+"name": "Lada XJO"
+},
+{
+"code": "XJP",
+"name": "Renault Captur"
+},
+{
+"code": "XNN",
+"name": "Nissan PB1D"
+},
+{
+"code": "XP10A",
+"name": "Renault R5 Turbo 3E"
+},
+{
+"code": "XPIV_C1AHS",
+"name": "Ddt_Training DDT-Training C1A HS"
+},
+{
+"code": "XPIV_C1A",
+"name": "Ddt_Training DDT-Training C1A"
+},
+{
+"code": "XR210",
+"name": "Mobilize Twizy II EZ1"
+},
+{
+"code": "XZGPH2",
+"name": "Renault Koleos II Ph2"
+},
+{
+"code": "XZGPH3",
+"name": "Renault Koleos II Ph3"
+},
+{
+"code": "XZG",
+"name": "Renault Koleos II"
+},
+{
+"code": "XZHPH2",
+"name": "Renault Kadjar CN Ph2"
+},
+{
+"code": "XZH",
+"name": "Renault Kadjar CN"
+},
+{
+"code": "XZI",
+"name": "Renault Kadjar Rus"
+},
+{
+"code": "XZJPH2",
+"name": "Renault Koleos II - Chine Ph2"
+},
+{
+"code": "XZJ",
+"name": "Renault Koleos II - Chine"
+}
+]

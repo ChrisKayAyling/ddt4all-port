@@ -142,13 +142,17 @@ public sealed class EcuCatalogService : IEcuCatalogService, IDisposable
             // one row per project so the browser can group / filter by vehicle; ECUs without a project get a single row
             var rows = projects.Count == 0 ? [""] : projects;
             foreach (var p in rows)
+            {
+                var veh = p.Length > 0 ? VehicleCatalog.ResolveOrOther(p) : null;
                 list.Add(new AppEcuEntry
                 {
-                    Id = e.Href, Name = e.EcuName, Address = e.Address, Protocol = proto, Project = p, ProjectName = "",
+                    Id = e.Href, Name = e.EcuName, Address = e.Address, Protocol = proto, Project = p, ProjectName = veh?.Name ?? "",
+                    VehicleCode = veh?.Code ?? "", Manufacturer = veh?.Manufacturer ?? "", Model = veh?.Model ?? "",
                     Group = e.Group, Supplier = supplier, Version = ai.Version ?? "", File = e.Href,
                     VariantCount = Math.Max(1, e.AutoIdentCount),
-                    SearchKey = $"{e.EcuName} {e.Group} {e.Address} {proto} {p} {supplier} {e.Href}".ToLowerInvariant(),
+                    SearchKey = $"{e.EcuName} {e.Group} {e.Address} {proto} {p} {veh?.Manufacturer} {veh?.Name} {supplier} {e.Href}".ToLowerInvariant(),
                 });
+            }
         }
         return new EcuCatalog(list, db.Projects.Where(p => p.Length > 0).ToArray(), protocols.ToArray());
     }

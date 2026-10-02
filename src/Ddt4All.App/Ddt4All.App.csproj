@@ -30,6 +30,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Localization\Locales\*.json" LogicalName="Ddt4All.App.Locales.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Resources\can-addressing.json" LogicalName="Ddt4All.App.Resources.can-addressing.json" />
+    <EmbeddedResource Include="Resources\vehicles.json" LogicalName="Ddt4All.App.Resources.vehicles.json" />
     <InternalsVisibleTo Include="Ddt4All.App.Tests" />
   </ItemGroup>
 

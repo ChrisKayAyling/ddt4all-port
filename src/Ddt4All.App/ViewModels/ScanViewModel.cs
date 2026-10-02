@@ -35,6 +35,9 @@ public sealed class ScanRow
 /// <summary>"Scan" section of the Connect page: probes every ECU address through the connected adapter and lets the user open what was found.</summary>
 public sealed partial class ScanViewModel : ViewModelBase
 {
+    private static string VehicleTitle(string code) =>
+        Ddt4All.App.Services.VehicleCatalog.Resolve(code) is { } v ? $"{v.Name}  ({code})" : code;
+
     private const string AllKey = "";
     private readonly IScanService _scan;
     private readonly IEcuCatalogService _catalog;
@@ -89,7 +92,7 @@ public sealed partial class ScanViewModel : ViewModelBase
         var db = _catalog.Database;
         if (db is not null && ProjectFilters.Count <= 1)
         {
-            ProjectFilters = [new ChoiceItem(AllKey, "All projects"), .. db.Projects.Where(p => p.Length > 0).Select(p => new ChoiceItem(p, p))];
+            ProjectFilters = [new ChoiceItem(AllKey, "All projects"), .. db.Projects.Where(p => p.Length > 0).Select(p => new ChoiceItem(p, VehicleTitle(p))).OrderBy(c => c.Title, StringComparer.OrdinalIgnoreCase)];
             SelectedProject = ProjectFilters[0];
         }
         RaiseState();

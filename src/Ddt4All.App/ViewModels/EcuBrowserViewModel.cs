@@ -21,6 +21,7 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     private EcuCatalog _data = EcuCatalog.Empty;
     private CancellationTokenSource? _filterCts;
     private bool _loaded;
+    private bool _updatingModels;
 
     public EcuBrowserViewModel(IEcuCatalogService catalog, INavigationService nav, INotificationService toasts,
         SessionState session, ISettingsService settings, ILogger<EcuBrowserViewModel>? log = null,
@@ -28,11 +29,13 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     {
         _ecuSession = ecuSession; _picker = picker;
         _catalog = catalog; _nav = nav; _toasts = toasts; _session = session; _settings = settings; _log = log;
-        GroupModes = [new("none", "No grouping"), new("project", "By project"), new("protocol", "By protocol")];
+        GroupModes = [new("none", "No grouping"), new("project", Loc.T("By vehicle")), new("protocol", "By protocol")];
         _selectedGroupMode = GroupModes[1];
-        ProjectFilters = [new ChoiceItem(AllKey, "All projects")];
+        ManufacturerFilters = [new ChoiceItem(AllKey, Loc.T("All manufacturers"))];
+        ModelFilters = [new ChoiceItem(AllKey, Loc.T("All models"))];
         ProtocolFilters = [new ChoiceItem(AllKey, "All protocols")];
-        _selectedProject = ProjectFilters[0];
+        _selectedManufacturer = ManufacturerFilters[0];
+        _selectedModel = ModelFilters[0];
         _selectedProtocol = ProtocolFilters[0];
         catalog.Changed += () => Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         { OnPropertyChanged(nameof(DatabaseMissing)); OnPropertyChanged(nameof(DatabasePath)); OnPropertyChanged(nameof(DatabaseError)); OnPropertyChanged(nameof(EmptyText)); });
@@ -42,12 +45,14 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     public override string Title => Loc.T("ECU Browser");
 
     public IReadOnlyList<ChoiceItem> GroupModes { get; }
-    [ObservableProperty] private IReadOnlyList<ChoiceItem> _projectFilters;
+    [ObservableProperty] private IReadOnlyList<ChoiceItem> _manufacturerFilters;
+    [ObservableProperty] private IReadOnlyList<ChoiceItem> _modelFilters;
     [ObservableProperty] private IReadOnlyList<ChoiceItem> _protocolFilters;
 
     [ObservableProperty] private string _searchText = "";
     [ObservableProperty] private ChoiceItem? _selectedGroupMode;
-    [ObservableProperty] private ChoiceItem? _selectedProject;
+    [ObservableProperty] private ChoiceItem? _selectedManufacturer;
+    [ObservableProperty] private ChoiceItem? _selectedModel;
     [ObservableProperty] private ChoiceItem? _selectedProtocol;
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string _resultSummary = "";
@@ -66,7 +71,13 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     partial void OnSelectedRowChanged(object? value) => SelectedEntry = value as EcuEntry;
     partial void OnSearchTextChanged(string value) => ScheduleFilter(120);
     partial void OnSelectedGroupModeChanged(ChoiceItem? value) => ScheduleFilter(0);
-    partial void OnSelectedProjectChanged(ChoiceItem? value) => ScheduleFilter(0);
+    partial void OnSelectedManufacturerChanged(ChoiceItem? value)
+    {
+        if (_updatingModels) return;
+        RebuildModels(value?.Id ?? AllKey);          // models cascade from the manufacturer
+        ScheduleFilter(0);
+    }
+    partial void OnSelectedModelChanged(ChoiceItem? value) { if (!_updatingModels) ScheduleFilter(0); }
     partial void OnSelectedProtocolChanged(ChoiceItem? value) => ScheduleFilter(0);
     partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsEmpty));
     partial void OnRowsChanged(IReadOnlyList<object> value) => OnPropertyChanged(nameof(IsEmpty));
@@ -84,9 +95,10 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
         try
         {
             _data = await _catalog.LoadAsync();
-            ProjectFilters = [new ChoiceItem(AllKey, "All projects"), .. _data.Projects.Select(p => new ChoiceItem(p, p))];
+            ManufacturerFilters = [new ChoiceItem(AllKey, Loc.T("All manufacturers")), .. _data.Manufacturers.Select(m => new ChoiceItem(m, m))];
+            SelectedManufacturer = ManufacturerFilters[0];
+            RebuildModels(AllKey);
             ProtocolFilters = [new ChoiceItem(AllKey, "All protocols"), .. _data.Protocols.Select(p => new ChoiceItem(p, p))];
-            SelectedProject = ProjectFilters[0];
             SelectedProtocol = ProtocolFilters[0];
             _log?.LogInformation("ECU catalog loaded: {Count} entries in {Ms} ms", _data.Entries.Count, sw.ElapsedMilliseconds);
             await ApplyFilterAsync(CancellationToken.None);
@@ -97,6 +109,19 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
             _toasts.Error(Loc.T("No database found"), ex.Message);
         }
         finally { IsLoading = false; }
+    }
+
+    private void RebuildModels(string manufacturer)
+    {
+        _updatingModels = true;
+        try
+        {
+            ModelFilters = [new ChoiceItem(AllKey, Loc.T("All models")),
+                .. _data.Vehicles.Where(v => manufacturer.Length == 0 || v.Manufacturer == manufacturer)
+                    .Select(v => new ChoiceItem(v.Code, manufacturer.Length == 0 ? $"{v.Manufacturer} {v.Model}" : v.Model))];
+            SelectedModel = ModelFilters[0];
+        }
+        finally { _updatingModels = false; }
     }
 
     private async void ScheduleFilter(int delayMs)
@@ -117,20 +142,22 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     {
         var data = _data;
         var text = SearchText;
-        var project = SelectedProject?.Id ?? AllKey;
+        var manufacturer = SelectedManufacturer?.Id ?? AllKey;
+        var vehicle = SelectedModel?.Id ?? AllKey;
         var protocol = SelectedProtocol?.Id ?? AllKey;
         var mode = SelectedGroupMode?.Id ?? "none";
-        var (rows, count) = await Task.Run(() => Filter(data, text, project, protocol, mode, ct), ct);
+        var (rows, count) = await Task.Run(() => Filter(data, text, "", protocol, mode, ct, manufacturer, vehicle), ct);
         ct.ThrowIfCancellationRequested();
         Rows = rows;
-        ResultSummary = count == data.Entries.Count
+        ResultSummary = count == data.UniqueEcuCount
             ? Loc.F("{0:N0} ECUs", count)
-            : Loc.F("{0:N0} of {1:N0} ECUs", count, data.Entries.Count);
+            : Loc.F("{0:N0} of {1:N0} ECUs", count, data.UniqueEcuCount);
     }
 
     public static (IReadOnlyList<object> Rows, int Count) FilterForTests(EcuCatalog d, string t, string p, string pr, string m) => Filter(d, t, p, pr, m, CancellationToken.None);
 
-    internal static (IReadOnlyList<object> Rows, int Count) Filter(EcuCatalog data, string text, string project, string protocol, string mode, CancellationToken ct)
+    internal static (IReadOnlyList<object> Rows, int Count) Filter(EcuCatalog data, string text, string project, string protocol, string mode, CancellationToken ct,
+        string manufacturer = "", string vehicle = "")
     {
         var tokens = text.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(t => t.ToLowerInvariant()).ToArray();
@@ -138,6 +165,8 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
         foreach (var e in data.Entries)
         {
             if (project.Length > 0 && e.Project != project) continue;
+            if (manufacturer.Length > 0 && e.Manufacturer != manufacturer) continue;
+            if (vehicle.Length > 0 && e.VehicleCode != vehicle) continue;
             if (protocol.Length > 0 && e.Protocol != protocol) continue;
             var ok = true;
             foreach (var t in tokens)
@@ -146,23 +175,29 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
         }
         ct.ThrowIfCancellationRequested();
 
-        if (mode == "none") return (matches.ToArray(), matches.Count);
+        // an ECU used by several vehicles has one row per vehicle; count (and, ungrouped, list) it once
+        var unique = matches.Count == 0 ? 0 : matches.Select(e => e.Id).Distinct().Count();
+        if (mode == "none")
+        {
+            var seen = new HashSet<string>(matches.Count);
+            return (matches.Where(e => seen.Add(e.Id)).ToArray(), unique);
+        }
 
-        Func<EcuEntry, string> key = mode == "protocol" ? e => e.Protocol : e => $"{e.Project} {e.ProjectName}";
+        Func<EcuEntry, string> key = mode == "protocol" ? e => e.Protocol : e => e.ProjectName.Length > 0 ? e.ProjectName : e.Project;
         var rows = new List<object>(matches.Count + 64);
         foreach (var g in matches.GroupBy(key).OrderBy(g => g.Key, StringComparer.Ordinal))
         {
             rows.Add(new GroupHeaderRow(g.Key, g.Count()));
             rows.AddRange(g.OrderBy(e => e.Name, StringComparer.Ordinal));
         }
-        return (rows, matches.Count);
+        return (rows, unique);
     }
 
     [RelayCommand]
     private void ClearFilters()
     {
         SearchText = "";
-        SelectedProject = ProjectFilters[0];
+        SelectedManufacturer = ManufacturerFilters[0];
         SelectedProtocol = ProtocolFilters[0];
     }
 
