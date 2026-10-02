@@ -34,7 +34,11 @@ jobs:
       - run: dotnet restore Ddt4All.sln
       - run: dotnet build Ddt4All.sln -c Release --no-restore
       # Benchmarks project is built but not executed.
-      - run: dotnet test Ddt4All.sln -c Release --no-build --logger "trx;LogFileName=test.trx" --results-directory TestResults
+      - name: Test
+        shell: bash
+        run: |
+          set -o pipefail
+          dotnet test Ddt4All.sln -c Release --no-build --logger "trx;LogFileName=test.trx" --logger "console;verbosity=normal" --results-directory TestResults 2>&1 | tee test.log
       - name: Report failed tests as annotations
         if: failure()
         shell: python
@@ -47,6 +51,10 @@ jobs:
                       m = r.find(".//t:Message", ns)
                       msg = " ".join((m.text or "").split())[:400] if m is not None else ""
                       print(f"::error title=FAILED {r.get('testName')}::{msg}")
+          import re
+          for line in open("test.log", errors="replace"):
+              if re.search(r"(Failed|Aborted|crash|error|Exception|Unhandled|exit code)", line, re.I) and "warning" not in line.lower():
+                  print("::error title=LOG::" + line.strip()[:300])
       - uses: actions/upload-artifact@v4
         if: always()
         with:
