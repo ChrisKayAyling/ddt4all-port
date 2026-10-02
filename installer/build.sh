@@ -12,8 +12,8 @@
 #       --version V      override version (default: Version in Directory.Build.props; leading v stripped)
 #       --publish-only   only run dotnet publish (artifacts/publish/<rid>/)
 #       --no-single-file publish as a folder instead of a single-file bundle
-#                        (default: single-file everywhere except osx-*, which uses a folder
-#                        layout inside the .app so it can be codesigned cleanly)
+#                        (default: single-file everywhere; on osx the native dylibs stay beside the exe
+#                        so the .app contains only Mach-O files and can be codesigned cleanly)
 #       --trim           enable IL trimming (OFF by default; Avalonia is not trim-safe without testing)
 #   -h, --help
 #
@@ -72,10 +72,12 @@ publish() {
     -p:PublishTrimmed=$([ $TRIM = 1 ] && echo true || echo false)
     -o "$out")
   local single="$SINGLE"
-  if [ "$single" = auto ]; then case "$rid" in osx-*) single=0;; *) single=1;; esac; fi
+  if [ "$single" = auto ]; then single=1; fi
   if [ "$single" = 1 ]; then
-    args+=(-p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
-           -p:IncludeNativeLibrariesForSelfExtract=true)
+    args+=(-p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true)
+    # macOS: keep native dylibs as separate files so every file in Contents/MacOS is Mach-O and can be
+    # code-signed (loose managed DLLs there make codesign fail). Elsewhere embed them for a single file.
+    case "$rid" in osx-*) ;; *) args+=(-p:IncludeNativeLibrariesForSelfExtract=true);; esac
   fi
   echo "-- publish $rid"
   "$DOTNET" "${args[@]}"

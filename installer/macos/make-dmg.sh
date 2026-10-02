@@ -2,6 +2,7 @@
 # make-dmg.sh <osx-rid> <version> -> artifacts/DDT4All-<ver>-<rid>.dmg   (macOS only: hdiutil)
 # Optional env: CODESIGN_IDENTITY (sign dmg), NOTARY_PROFILE (xcrun notarytool keychain profile -> notarize+staple)
 set -euo pipefail
+trap 'echo "::error::make-dmg.sh failed at line $LINENO"' ERR
 [ "$(uname -s)" = Darwin ] || { echo "make-dmg.sh requires macOS (hdiutil)" >&2; exit 1; }
 RID="$1"; VER="$2"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; ROOT="$(cd "$HERE/../.." && pwd)"
