@@ -9,6 +9,7 @@ using Ddt4All.App.Views.Screens;
 using Ddt4All.Core.Abstractions;
 using Ddt4All.Core.Ecu;
 using Ddt4All.Core.Layout;
+using System.Windows.Input;
 
 namespace Ddt4All.App.ViewModels.Screens;
 
@@ -39,6 +40,11 @@ public sealed partial class ScreensViewModel : PageViewModel
     private CancellationTokenSource? _openCts;
     private List<ScreenNode> _allNodes = new();
     private bool _suppress;
+    private List<FormRow> _allRows = new();
+    private FormDisplayRow?[] _displayRows = Array.Empty<FormDisplayRow?>();
+    private readonly List<FormInputRow> _inputRows = new();
+    private readonly List<FormButtonItem> _buttonItems = new();
+    private readonly List<FormSendBarRow> _sendBars = new();
 
     public ScreensViewModel(SessionState state, IScreenSession session, INotificationService toasts, IDialogService dialogs,
         IFilePickerService? files = null, INavigationService? nav = null)
@@ -48,7 +54,7 @@ public sealed partial class ScreensViewModel : PageViewModel
         session.Changed += () => Dispatcher.UIThread.Post(Reload);
         state.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName == nameof(SessionState.IsExpertMode)) { OnPropertyChanged(nameof(IsExpert)); OnPropertyChanged(nameof(WriteHint)); }
+            if (e.PropertyName == nameof(SessionState.IsExpertMode)) { OnPropertyChanged(nameof(IsExpert)); OnPropertyChanged(nameof(WriteHint)); RefreshExpert(); }
         };
         Reload();
     }
@@ -69,6 +75,20 @@ public sealed partial class ScreensViewModel : PageViewModel
     public event Action? HistoryChanged;
     /// <summary>An input value was staged/unstaged and the canvas item should reflect it.</summary>
     public event Action<SceneItem, string, bool>? InputStaged;
+
+    /// <summary>Rows of the form view (after the control filter). Replaced as a whole when the screen or the filter changes.</summary>
+    [ObservableProperty] private IReadOnlyList<FormRow> _rows = Array.Empty<FormRow>();
+    [ObservableProperty] private string _controlFilter = "";
+    /// <summary>Show the original DDT absolute-position canvas instead of the form (default: form).</summary>
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(IsFormView))] private bool _isClassicView;
+    [ObservableProperty] private string _formSummary = "";
+    [ObservableProperty] private string _pageNote = "";
+    [ObservableProperty] private bool _noMatches;
+    public bool IsFormView => !IsClassicView;
+    public ScreenForm? Form { get; private set; }
+    public IReadOnlyList<FormRow> AllRows => _allRows;
+    public IReadOnlyList<FormInputRow> InputRows => _inputRows;
+    public FormDisplayRow? DisplayRow(int slot) => slot >= 0 && slot < _displayRows.Length ? _displayRows[slot] : null;
 
     [ObservableProperty] private ScreenNode? _selectedNode;
     [ObservableProperty] private string _filterText = "";
@@ -108,7 +128,9 @@ public sealed partial class ScreensViewModel : PageViewModel
     {
         OnPropertyChanged(nameof(IsRunning)); OnPropertyChanged(nameof(IsPaused)); OnPropertyChanged(nameof(IsStopped));
         StartCommand.NotifyCanExecuteChanged(); PauseCommand.NotifyCanExecuteChanged(); StopCommand.NotifyCanExecuteChanged();
+        RefreshDisplayStates();
     }
+    partial void OnControlFilterChanged(string value) => ApplyControlFilter();
     partial void OnSelectedSlotChanged(int value) { OnPropertyChanged(nameof(HasSelection)); }
     partial void OnStagedCountChanged(int value) { OnPropertyChanged(nameof(HasStaged)); SendStagedCommand.NotifyCanExecuteChanged(); }
     partial void OnHasEcuChanged(bool value) { OnPropertyChanged(nameof(EmptyTitle)); OnPropertyChanged(nameof(EmptyText)); }
@@ -131,6 +153,8 @@ public sealed partial class ScreensViewModel : PageViewModel
         if (LiveState == LiveState.Running) { _engine?.Pause(); LiveState = LiveState.Paused; _wasHidden = true; }
     }
     private bool _wasHidden;
+    private long _sparkCycle = -1;
+    private List<FormDisplayRow> _numericRows = new();
     public void OnShown()
     {
         if (_wasHidden && LiveState == LiveState.Paused) { _engine?.Resume(); LiveState = LiveState.Running; }
@@ -185,7 +209,7 @@ public sealed partial class ScreensViewModel : PageViewModel
     {
         _openCts?.Cancel();
         DisposeEngine();
-        Scene = null; _staged.Clear(); StagedCount = 0;
+        Scene = null; _staged.Clear(); StagedCount = 0; ClearForm();
         HasScreen = false; ScreenTitle = ""; WidgetCount = 0; SelectedSlot = -1; _history.Clear();
         SceneChanged?.Invoke(null);
     }
@@ -210,6 +234,7 @@ public sealed partial class ScreensViewModel : PageViewModel
         _staged.Clear(); StagedCount = 0; SelectedSlot = -1; _history.Clear();
         var ecu = _session.Ecu;
         Scene = ScreenScene.Build(screen, ecu);
+        BuildForm(screen, ecu);
         ScreenTitle = screen.Name; HasScreen = true;
         WidgetCount = Scene.Items.Length;
         SceneChanged?.Invoke(Scene);
@@ -231,6 +256,8 @@ public sealed partial class ScreensViewModel : PageViewModel
         }
 
         var engine = _engine = new ScreenLiveEngine(ecu, screen, transport) { RateHz = Math.Clamp(RateHz, 1, 30) };
+        foreach (var r in _displayRows) if (r is not null) r.Engine = engine;
+        RefreshDisplayStates();
         engine.StateChanged += OnEngineState;
         OnPropertyChanged(nameof(IsOnline));
         StatusText = engine.RequestCount == 0 ? Loc.T("This screen has no live values") : Loc.T("Ready");
@@ -295,7 +322,22 @@ public sealed partial class ScreensViewModel : PageViewModel
         var e = _engine;
         if (e is null) return;
         e.DrainChanges(_changed);
-        if (_changed.Count > 0) ValuesChanged?.Invoke(_changed);
+        if (_changed.Count > 0)
+        {
+            bool running = LiveState == LiveState.Running;
+            foreach (var slot in _changed)
+            {
+                if ((uint)slot >= (uint)_displayRows.Length || _displayRows[slot] is not { } row) continue;
+                row.Apply(e.GetText(slot), e.GetStatus(slot), running);
+            }
+            ValuesChanged?.Invoke(_changed);
+        }
+        // sparklines of numeric tiles follow every poll cycle (cheap: they pull the samples when invalidated)
+        if (_sparkCycle != e.CycleCount)
+        {
+            _sparkCycle = e.CycleCount;
+            foreach (var r in _numericRows) r.RaiseSampled();
+        }
 
         if (SelectedSlot >= 0)
         {
@@ -314,9 +356,12 @@ public sealed partial class ScreensViewModel : PageViewModel
 
     public void SelectDisplay(int slot)
     {
+        if (DisplayRow(SelectedSlot) is { } prev) prev.IsSelected = false;
+        if (slot >= 0 && DisplayRow(slot) is { } cur) cur.IsSelected = true;
         SelectedSlot = slot;
         var scr = SelectedNode?.Screen;
-        SelectedName = slot >= 0 && scr is not null && slot < scr.Displays.Count ? scr.Displays[slot].DataName : "";
+        SelectedName = slot >= 0 && scr is not null && slot < scr.Displays.Count
+            ? (DisplayRow(slot) is { } sr ? sr.Caption : scr.Displays[slot].DataName) : "";
         _history.Clear();
         SelectedValue = ""; SelectedRange = "";
         if (_engine is not null) Tick(); else HistoryChanged?.Invoke();
@@ -402,18 +447,37 @@ public sealed partial class ScreensViewModel : PageViewModel
     /// <summary>Validates an edited input value and stages it (nothing is sent). Returns false if the codec rejects it.</summary>
     public bool StageInput(SceneItem item, string text)
     {
-        var ecu = _session.Ecu;
-        var req = ecu?.GetRequest(item.RequestName);
-        if (ecu is null || req is null) { _toasts.Warning(Loc.T("Unknown request"), item.RequestName); return false; }
-        var probe = new Dictionary<string, string> { [item.DataName] = text };
-        if (!req.TryBuildRequest(probe, out _, out var err))
-        { _toasts.Warning(Loc.F("Invalid value for {0}", item.DataName), err); return false; }
-        if (!_staged.TryGetValue(req.Name, out var d)) _staged[req.Name] = d = new();
-        d[item.DataName] = text;
-        StagedCount = _staged.Values.Sum(x => x.Count);
-        InputStaged?.Invoke(item, text, true);
-        StatusText = Loc.F("{0} staged. Press a button or 'Send inputs' (expert mode) to write.", item.DataName);
+        var err = StageCore(item.RequestName, item.DataName, text, null);
+        if (err is not null) { _toasts.Warning(err.StartsWith("\u0001") ? Loc.T("Unknown request") : Loc.F("Invalid value for {0}", item.DataName), err.TrimStart('\u0001')); return false; }
         return true;
+    }
+
+    /// <summary>Stages an edit made in a form tile; returns the validation error (shown inline) or null.</summary>
+    private string? StageFromRow(FormInputRow row, string text)
+    {
+        var err = StageCore(row.RequestName, row.RawName, text, row);
+        return err?.TrimStart('\u0001');
+    }
+
+    /// <summary>Codec validation + bookkeeping shared by the canvas and the form. Unknown requests are flagged with a leading \u0001.</summary>
+    private string? StageCore(string requestName, string dataName, string text, FormInputRow? origin)
+    {
+        var ecu = _session.Ecu;
+        var req = ecu?.GetRequest(requestName);
+        if (ecu is null || req is null) return "\u0001" + requestName;
+        var probe = new Dictionary<string, string> { [dataName] = text };
+        if (!req.TryBuildRequest(probe, out _, out var err)) return err ?? "Invalid value";
+        if (!_staged.TryGetValue(req.Name, out var d)) _staged[req.Name] = d = new();
+        d[dataName] = text;
+        StagedCount = _staged.Values.Sum(x => x.Count);
+        foreach (var r in _inputRows)
+            if (!ReferenceEquals(r, origin) && r.RequestName == requestName && r.RawName == dataName) r.SetEdit(text);
+        if (Scene is not null)
+            foreach (var it in Scene.Items)
+                if (it.Kind == SceneKind.Input && it.RequestName == requestName && it.DataName == dataName) InputStaged?.Invoke(it, text, true);
+        UpdateSendBars();
+        StatusText = Loc.F("{0} staged. Press a button or 'Send inputs' (expert mode) to write.", dataName);
+        return null;
     }
 
     [RelayCommand]
@@ -421,6 +485,8 @@ public sealed partial class ScreensViewModel : PageViewModel
     {
         _staged.Clear(); StagedCount = 0;
         if (Scene is not null) foreach (var it in Scene.Items) if (it.Staged) InputStaged?.Invoke(it, "", false);
+        foreach (var r in _inputRows) if (r.IsStaged || r.HasError) r.Revert();
+        UpdateSendBars();
     }
 
     [RelayCommand(CanExecute = nameof(HasStaged))]
@@ -466,6 +532,8 @@ public sealed partial class ScreensViewModel : PageViewModel
             foreach (var c in cmds) _staged.Remove(c.RequestName);
             StagedCount = _staged.Values.Sum(x => x.Count);
             if (Scene is not null) foreach (var it in Scene.Items) if (it.Staged && !_staged.TryGetValue(it.RequestName, out _)) InputStaged?.Invoke(it, "", false);
+            foreach (var r in _inputRows) if (r.IsStaged && !_staged.ContainsKey(r.RequestName)) r.Revert();
+            UpdateSendBars();
             _toasts.Success(title, Loc.T("Sent."));
         }
         catch (Exception ex) { _toasts.Error(title, ex.Message); }
@@ -492,6 +560,206 @@ public sealed partial class ScreensViewModel : PageViewModel
         }
         return skipped;
     }
+
+
+    /// <summary>Sends one request group with its staged values (expert mode + confirmation).</summary>
+    public async Task SendRequestAsync(string requestName)
+    {
+        if (_engine is null || _session.Ecu is null) { _toasts.Warning(Loc.T("Offline"), Loc.T("Connect an adapter first.")); return; }
+        if (!_staged.ContainsKey(requestName)) return;
+        if (!RequireExpert()) return;
+        if (!await _dialogs.ConfirmAsync(Loc.T("Write to ECU"), Loc.F("Send {0} to the ECU with the edited values?", requestName), Loc.T("Send"), Loc.T("Cancel"), danger: true)) return;
+        await RunCommandsAsync(new[] { new SendCommand(requestName, 0) }, requestName);
+    }
+
+    private void DiscardRequest(string requestName)
+    {
+        _staged.Remove(requestName);
+        StagedCount = _staged.Values.Sum(x => x.Count);
+        foreach (var r in _inputRows) if (r.RequestName == requestName && (r.IsStaged || r.HasError)) r.Revert();
+        if (Scene is not null) foreach (var it in Scene.Items) if (it.Staged && it.RequestName == requestName) InputStaged?.Invoke(it, "", false);
+        UpdateSendBars();
+    }
+
+    private void UpdateSendBars()
+    {
+        foreach (var b in _sendBars) b.StagedCount = _staged.TryGetValue(b.RequestName, out var d) ? d.Count : 0;
+    }
+
+    private void RefreshExpert()
+    {
+        bool x = IsExpert;
+        foreach (var b in _buttonItems) b.Expert = x;
+        foreach (var b in _sendBars) b.Expert = x;
+    }
+
+    private void RefreshDisplayStates()
+    {
+        bool running = LiveState == LiveState.Running;
+        var e = _engine;
+        foreach (var r in _displayRows)
+        {
+            if (r is null) continue;
+            if (e is null) { r.Apply(null, 0, false); continue; }
+            r.Apply(e.GetText(r.Slot), e.GetStatus(r.Slot), running);
+        }
+    }
+
+    private bool IsSafeButton(ScreenButton b)
+    {
+        var ecu = _session.Ecu;
+        return ecu is not null && b.Send.Count > 0 && b.Send.All(s => ecu.GetRequest(s.RequestName) is { } r && r.GetSentBytesTemplate() is { Length: > 0 } t && _state.IsSafeRequest(t[0]));
+    }
+
+    // ------------------------------------------------------------------ form model
+
+    private void ClearForm()
+    {
+        Form = null; _allRows = new(); _displayRows = Array.Empty<FormDisplayRow?>(); _numericRows = new();
+        _inputRows.Clear(); _buttonItems.Clear(); _sendBars.Clear();
+        Rows = Array.Empty<FormRow>(); FormSummary = ""; PageNote = ""; NoMatches = false;
+    }
+
+    private void BuildForm(Screen screen, EcuFile? ecu)
+    {
+        ClearForm();
+        var form = Form = ScreenFormBuilder.Build(screen);
+        var rows = new List<FormRow>(form.EntryCount + form.Sections.Count * 2);
+        _displayRows = new FormDisplayRow?[screen.Displays.Count];
+        int sec = 0, values = 0;
+
+        FormDisplayRow MakeDisplay(int idx, string caption, string hint, bool reading)
+        {
+            var d = screen.Displays[idx];
+            var data = ecu?.GetData(d.DataName);
+            bool numeric = data is { Scaled: true, BytesAscii: false, HasList: false };
+            var row = new FormDisplayRow
+            {
+                Slot = idx, Caption = caption, RawName = d.DataName, Hint = hint, Unit = data?.Unit ?? "", IsNumeric = numeric,
+                IsReading = reading, Tooltip = ScreenScene.Describe(ecu, d),
+                SearchKey = (caption + " " + d.DataName + " " + (data?.Unit ?? "")).ToLowerInvariant(),
+            };
+            int slot = idx;
+            row.SelectCommand = new RelayCommand(() => SelectDisplay(slot));
+            _displayRows[idx] = row;
+            return row;
+        }
+
+        foreach (var fs in form.Sections)
+        {
+            int count = fs.Entries.Count(e => e.Kind is FormEntryKind.Display or FormEntryKind.Input or FormEntryKind.Button);
+            if (fs.HasTitle) rows.Add(new FormHeadingRow { Section = sec, Title = fs.Title, Count = count, SearchKey = fs.Title.ToLowerInvariant() });
+            List<FormButtonItem>? strip = null;
+            var requests = new List<string>();
+            void FlushStrip()
+            {
+                if (strip is null) return;
+                rows.Add(new FormButtonsRow { Section = sec, Buttons = strip, SearchKey = string.Join(' ', strip.Select(b => b.Text)).ToLowerInvariant() });
+                strip = null;
+            }
+            foreach (var e in fs.Entries)
+            {
+                if (e.Kind != FormEntryKind.Button) FlushStrip();
+                switch (e.Kind)
+                {
+                    case FormEntryKind.Display:
+                    {
+                        var row = MakeDisplay(e.Index, e.Caption, string.Join("  ", e.Hints), false);
+                        row.Section = sec; rows.Add(row); values++;
+                        break;
+                    }
+                    case FormEntryKind.Input:
+                    {
+                        var si = screen.Inputs[e.Index];
+                        var data = ecu?.GetData(si.DataName);
+                        var d = FormInputRow.Describe(data);
+                        FormDisplayRow? reading = e.ReadingSlot >= 0 ? MakeDisplay(e.ReadingSlot, e.Caption, "", true) : null;
+                        FormInputRow row = d.Kind switch
+                        {
+                            EditorKind.List => new FormListInputRow(StageFromRow) { Section = sec, Index = e.Index, Caption = e.Caption, RawName = si.DataName, RequestName = si.RequestName, Hint = string.Join("  ", e.Hints), Tooltip = ScreenScene.Describe(ecu, si), Unit = d.Unit, Choices = d.Choices, Reading = reading, SearchKey = (e.Caption + " " + si.DataName + " " + si.RequestName + " " + d.Unit).ToLowerInvariant() },
+                            EditorKind.Number => new FormNumberInputRow(StageFromRow) { Section = sec, Index = e.Index, Caption = e.Caption, RawName = si.DataName, RequestName = si.RequestName, Hint = string.Join("  ", e.Hints), Tooltip = ScreenScene.Describe(ecu, si), Unit = d.Unit, Minimum = d.Min, Maximum = d.Max, Increment = d.Inc, Decimals = d.Decimals, Reading = reading, SearchKey = (e.Caption + " " + si.DataName + " " + si.RequestName + " " + d.Unit).ToLowerInvariant() },
+                            _ => new FormTextInputRow(StageFromRow, d.Kind) { Section = sec, Index = e.Index, Caption = e.Caption, RawName = si.DataName, RequestName = si.RequestName, Hint = string.Join("  ", e.Hints), Tooltip = ScreenScene.Describe(ecu, si), Unit = d.Unit, MaxLength = d.MaxLen, Watermark = d.Watermark, Reading = reading, SearchKey = (e.Caption + " " + si.DataName + " " + si.RequestName + " " + d.Unit).ToLowerInvariant() },
+                        };
+                        rows.Add(row); _inputRows.Add(row); values++;
+                        if (si.RequestName.Length > 0 && !requests.Contains(si.RequestName)) requests.Add(si.RequestName);
+                        break;
+                    }
+                    case FormEntryKind.Button:
+                    {
+                        var b = screen.Buttons[e.Index];
+                        bool write = b.Send.Count > 0 && !IsSafeButton(b);
+                        var item = new FormButtonItem
+                        {
+                            Text = e.Caption, IsWrite = write, Width = FormButtonItem.EstimateWidth(e.Caption),
+                            Tooltip = (b.Messages.Count > 0 ? string.Join("\n", b.Messages) + "\n" : "") + (b.Send.Count > 0 ? string.Join(", ", b.Send.Select(x => x.RequestName)) : Loc.T("This button has no command.")),
+                            Expert = IsExpert,
+                        };
+                        item.PressCommand = new AsyncRelayCommand(() => PressButtonAsync(b));
+                        _buttonItems.Add(item);
+                        (strip ??= new()).Add(item);
+                        values++;
+                        break;
+                    }
+                    case FormEntryKind.Note:
+                        rows.Add(new FormNoteRow { Section = sec, Text = e.Text, SearchKey = e.Text.ToLowerInvariant() });
+                        break;
+                }
+            }
+            FlushStrip();
+            foreach (var req in requests)
+            {
+                var bar = new FormSendBarRow { Section = sec, RequestName = req, Expert = IsExpert, SearchKey = req.ToLowerInvariant() };
+                string rq = req;
+                bar.SendCommand = new AsyncRelayCommand(() => SendRequestAsync(rq));
+                bar.DiscardCommand = new RelayCommand(() => DiscardRequest(rq));
+                rows.Add(bar); _sendBars.Add(bar);
+            }
+            sec++;
+        }
+        foreach (var r in _inputRows) if (r.Reading is { } rd) { rd.Section = r.Section; }
+        _allRows = rows;
+        _numericRows = _displayRows.Where(r => r is { IsNumeric: true }).Select(r => r!).ToList();
+        PageNote = form.PageTitle.Length > 0 ? form.PageTitle + " · " : "";
+        FormSummary = form.Sections.Count == 1 ? Loc.F("{0} controls", values) : Loc.F("{0} controls in {1} sections", values, form.Sections.Count);
+        ApplyControlFilter();
+        RefreshDisplayStates();
+    }
+
+    /// <summary>Filters the form by caption / data name / unit / section title. A matching section title keeps the whole section.</summary>
+    private void ApplyControlFilter()
+    {
+        var f = ControlFilter.Trim().ToLowerInvariant();
+        if (f.Length == 0) { Rows = _allRows; NoMatches = false; return; }
+        var res = new List<FormRow>();
+        int i = 0;
+        while (i < _allRows.Count)
+        {
+            int j = i; int sec = _allRows[i].Section;
+            while (j < _allRows.Count && _allRows[j].Section == sec) j++;
+            bool titleHit = _allRows[i] is FormHeadingRow h && h.SearchKey.Contains(f);
+            var picked = new List<FormRow>();
+            bool anyInput = false;
+            for (int k = i; k < j; k++)
+            {
+                var r = _allRows[k];
+                if (r is FormHeadingRow) continue;
+                bool hit = titleHit || (r is not FormSendBarRow && r.SearchKey.Contains(f));
+                if (r is FormSendBarRow) continue;
+                if (hit) { picked.Add(r); if (r is FormInputRow) anyInput = true; }
+            }
+            if (picked.Count > 0)
+            {
+                if (_allRows[i] is FormHeadingRow hr) res.Add(hr);
+                res.AddRange(picked);
+                if (anyInput) for (int k = i; k < j; k++) if (_allRows[k] is FormSendBarRow sb) res.Add(sb);
+            }
+            i = j;
+        }
+        Rows = res; NoMatches = res.Count == 0;
+    }
+
+    /// <summary>Bridge for tests and the classic canvas: edit an input by its data name as if typed into the tile.</summary>
+    public FormInputRow? FindInput(string dataName) => _inputRows.FirstOrDefault(r => r.RawName == dataName);
 
     public void Dispose()
     {

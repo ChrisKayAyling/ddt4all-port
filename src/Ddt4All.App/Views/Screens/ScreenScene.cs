@@ -74,15 +74,28 @@ public sealed class ScreenScene
     // DDT font sizes are in points at 96 dpi
     private static double MakeSize(LayoutFont f) => Math.Clamp((f.Size <= 0 ? 8.5 : f.Size) * 96.0 / 72.0, 7, 60);
 
-    private static Rect R(LayoutRect r) => new(r.Left, r.Top, Math.Max(1, r.Width), Math.Max(1, r.Height));
+    private static Rect R(LayoutRect r, double k = 1) => new(r.Left * k, r.Top * k, Math.Max(1, r.Width * k), Math.Max(1, r.Height * k));
+
+    /// <summary>Layouts converted from DDT2000 are stored in twips (15 per pixel): detect them by the control height (a real pixel layout has ~20-40 px rows).</summary>
+    internal static double LayoutScale(Screen s)
+    {
+        var h = new List<int>(s.Displays.Count + s.Inputs.Count + s.Buttons.Count);
+        foreach (var d in s.Displays) h.Add(d.Bounds.Height);
+        foreach (var d in s.Inputs) h.Add(d.Bounds.Height);
+        foreach (var b in s.Buttons) h.Add(b.Bounds.Height);
+        if (h.Count == 0) return 1;
+        h.Sort();
+        return h[h.Count / 2] >= 120 ? 1.0 / 15 : 1.0;
+    }
 
     public static ScreenScene Build(Screen s, EcuFile? ecu)
     {
+        double k = LayoutScale(s);
         var items = new List<SceneItem>(s.Labels.Count + s.Displays.Count + s.Inputs.Count + s.Buttons.Count);
         foreach (var l in s.Labels)
             items.Add(new SceneItem
             {
-                Kind = SceneKind.Label, Bounds = R(l.Bounds), Caption = l.Text, Back = Brush(l.Color), Fore = Brush(l.FontColor),
+                Kind = SceneKind.Label, Bounds = R(l.Bounds, k), Caption = l.Text, Back = Brush(l.Color), Fore = Brush(l.FontColor),
                 Face = MakeFace(l.Font), FontSize = MakeSize(l.Font), Alignment = int.TryParse(l.Alignment, NumberStyles.Integer, CultureInfo.InvariantCulture, out var a) ? a : 0,
             });
         for (int i = 0; i < s.Displays.Count; i++)
@@ -90,7 +103,7 @@ public sealed class ScreenScene
             var d = s.Displays[i];
             items.Add(new SceneItem
             {
-                Kind = SceneKind.Display, Bounds = R(d.Bounds), LabelWidth = d.Width, Caption = d.DataName, Value = "",
+                Kind = SceneKind.Display, Bounds = R(d.Bounds, k), LabelWidth = d.Width * k, Caption = d.DataName, Value = "",
                 Back = Brush(d.Color), Fore = Brush(d.FontColor), Face = MakeFace(d.Font), FontSize = MakeSize(d.Font),
                 Slot = i, DataName = d.DataName, RequestName = d.RequestName, Tooltip = Describe(ecu, d),
             });
@@ -105,7 +118,7 @@ public sealed class ScreenScene
             }
             items.Add(new SceneItem
             {
-                Kind = SceneKind.Input, Bounds = R(inp.Bounds), LabelWidth = inp.Width, Caption = inp.DataName, Value = "",
+                Kind = SceneKind.Input, Bounds = R(inp.Bounds, k), LabelWidth = inp.Width * k, Caption = inp.DataName, Value = "",
                 Back = Brush(inp.Color), Fore = Brush(inp.FontColor), Face = MakeFace(inp.Font), FontSize = MakeSize(inp.Font),
                 DataName = inp.DataName, RequestName = inp.RequestName, Choices = choices, Input = inp, Tooltip = Describe(ecu, inp),
             });
@@ -113,16 +126,16 @@ public sealed class ScreenScene
         foreach (var b in s.Buttons)
             items.Add(new SceneItem
             {
-                Kind = SceneKind.Button, Bounds = R(b.Bounds), Caption = b.Text, Face = MakeFace(b.Font), FontSize = MakeSize(b.Font),
+                Kind = SceneKind.Button, Bounds = R(b.Bounds, k), Caption = b.Text, Face = MakeFace(b.Font), FontSize = MakeSize(b.Font),
                 Button = b, Tooltip = string.Join(", ", b.Send.Select(x => x.RequestName)),
             });
 
-        double w = s.Width, h = s.Height;
+        double w = s.Width * k, h = s.Height * k;
         foreach (var i in items) { w = Math.Max(w, i.Bounds.Right + 4); h = Math.Max(h, i.Bounds.Bottom + 4); }
         return new ScreenScene(Math.Max(w, 200), Math.Max(h, 120), Brush(s.Color), items.ToArray(), s.Displays.Count);
     }
 
-    private static string Describe(EcuFile? ecu, ScreenDisplay d)
+    internal static string Describe(EcuFile? ecu, ScreenDisplay d)
     {
         if (ecu is null) return d.DataName;
         var sb = new System.Text.StringBuilder(d.RequestName).Append('\n');

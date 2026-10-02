@@ -11,8 +11,42 @@
         <Style Selector="Button.tool"><Setter Property="Padding" Value="9 5" /><Setter Property="MinHeight" Value="32" /></Style>
         <Style Selector="ToggleButton.tool:not(:checked)"><Setter Property="Background" Value="{DynamicResource SurfaceBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" /></Style>
         <Style Selector="ToggleButton.tool"><Setter Property="Padding" Value="9 5" /><Setter Property="MinHeight" Value="32" /><Setter Property="CornerRadius" Value="6" /></Style>
+        <!-- form tiles -->
+        <Style Selector="Button.tile">
+            <Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="1" /><Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Padding" Value="6 4" /><Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" /><Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="VerticalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="Button.tile:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" /><Setter Property="BorderBrush" Value="Transparent" /></Style>
+        <Style Selector="Button.tile.selected /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="BorderBrush" Value="{DynamicResource SystemControlHighlightAccentBrush}" /><Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" /></Style>
+        <Style Selector="Border.itile"><Setter Property="CornerRadius" Value="8" /><Setter Property="Padding" Value="6 4" /><Setter Property="BorderThickness" Value="1" /><Setter Property="BorderBrush" Value="Transparent" /></Style>
+        <Style Selector="Border.itile.staged"><Setter Property="Background" Value="{DynamicResource WarningSoftBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}" /></Style>
+        <Style Selector="Border.itile.error"><Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" /></Style>
+        <Style Selector="TextBlock.tcap"><Setter Property="FontSize" Value="12.5" /><Setter Property="FontWeight" Value="Medium" /><Setter Property="TextWrapping" Value="Wrap" /><Setter Property="MaxLines" Value="2" /><Setter Property="TextTrimming" Value="CharacterEllipsis" /></Style>
+        <Style Selector="TextBlock.thint"><Setter Property="FontSize" Value="11" /><Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" /><Setter Property="Margin" Value="6 1 0 0" /></Style>
+        <Style Selector="Border.vbox"><Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="6" /><Setter Property="Padding" Value="10 0 8 0" /><Setter Property="Height" Value="40" /><Setter Property="VerticalAlignment" Value="Bottom" /></Style>
+        <Style Selector="Border.vbox.error"><Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" /></Style>
+        <Style Selector="Border.vbox.read"><Setter Property="Height" Value="28" /></Style>
+        <Style Selector="TextBlock.val"><Setter Property="FontFamily" Value="{DynamicResource MonoFont}" /><Setter Property="FontSize" Value="17" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+        <Style Selector="Border.vbox.read TextBlock.val"><Setter Property="FontSize" Value="14" /></Style>
+        <Style Selector="TextBlock.val.stale"><Setter Property="Opacity" Value="0.5" /></Style>
+        <Style Selector="TextBlock.val.textual"><Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" /><Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="Medium" /></Style>
+        <Style Selector="TextBlock.unit"><Setter Property="FontSize" Value="12" /><Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" /><Setter Property="VerticalAlignment" Value="Center" /><Setter Property="Margin" Value="5 2 0 0" /></Style>
+        <Style Selector="TextBlock.ph"><Setter Property="FontFamily" Value="{DynamicResource MonoFont}" /><Setter Property="FontSize" Value="17" /><Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+        <Style Selector="TextBlock.ph.error"><Setter Property="Foreground" Value="{DynamicResource DangerBrush}" /></Style>
+        <Style Selector="Ellipse.dot"><Setter Property="Width" Value="7" /><Setter Property="Height" Value="7" /><Setter Property="Fill" Value="{DynamicResource TextMutedBrush}" /><Setter Property="Opacity" Value="0.5" /><Setter Property="VerticalAlignment" Value="Center" /><Setter Property="Margin" Value="0 0 8 0" /></Style>
+        <Style Selector="Ellipse.dot.live"><Setter Property="Fill" Value="{DynamicResource SuccessBrush}" /><Setter Property="Opacity" Value="1" /></Style>
+        <Style Selector="Ellipse.dot.stale"><Setter Property="Fill" Value="{DynamicResource WarningBrush}" /><Setter Property="Opacity" Value="1" /></Style>
+        <Style Selector="Ellipse.dot.error"><Setter Property="Fill" Value="{DynamicResource DangerBrush}" /><Setter Property="Opacity" Value="1" /></Style>
+        <Style Selector="Border.badge"><Setter Property="CornerRadius" Value="999" /><Setter Property="Padding" Value="7 1" /><Setter Property="Background" Value="{DynamicResource WarningBrush}" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+        <Style Selector="Border.badge TextBlock"><Setter Property="FontSize" Value="10.5" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="Foreground" Value="#1F1300" /></Style>
+        <Style Selector="Button.wbtn"><Setter Property="Height" Value="36" /><Setter Property="Padding" Value="12 0" /></Style>
+        <Style Selector="Button.wbtn.write"><Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" /><Setter Property="Foreground" Value="{DynamicResource DangerBrush}" /></Style>
+        <Style Selector="Button.wbtn.locked"><Setter Property="Opacity" Value="0.65" /></Style>
+        <Style Selector="TextBlock.sectitle"><Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="TextTrimming" Value="CharacterEllipsis" /></Style>
     </UserControl.Styles>
-    <Grid ColumnDefinitions="272,*" Margin="20 18 20 16" ColumnSpacing="14">
+    <Grid x:Name="RootGrid" ColumnDefinitions="272,*" Margin="20 18 20 16" ColumnSpacing="14">
         <!-- screen tree -->
         <Border Classes="card" Padding="0" ClipToBounds="True">
             <Grid RowDefinitions="Auto,Auto,*">
@@ -38,7 +72,7 @@
         <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" RowSpacing="12">
             <Border Classes="card" Padding="10 8">
                 <WrapPanel ItemSpacing="6" LineSpacing="6">
-                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <WrapPanel ItemSpacing="6" LineSpacing="6" VerticalAlignment="Center">
                         <Button Classes="tool accent" Command="{Binding StartCommand}" ToolTip.Tip="{loc:Tr 'Start live data'}">
                             <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Play}" Width="13" Height="13" /><TextBlock Text="{loc:Tr 'Start'}" /></StackPanel>
                         </Button>
@@ -49,36 +83,157 @@
                             <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Stop}" Width="13" Height="13" /><TextBlock Text="{loc:Tr 'Stop'}" /></StackPanel>
                         </Button>
                         <Border Width="1" Height="22" Background="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
-                        <TextBlock Classes="caption" Text="{loc:Tr 'Rate'}" VerticalAlignment="Center" />
-                        <Slider Width="90" Minimum="1" Maximum="30" Value="{Binding RateHz}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" />
-                        <TextBlock Classes="mono" Width="44" VerticalAlignment="Center" Text="{Binding RateHz, StringFormat='{}{0:0} Hz'}" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Classes="caption" Text="{loc:Tr 'Rate'}" VerticalAlignment="Center" />
+                            <Slider Width="90" Minimum="1" Maximum="30" Value="{Binding RateHz}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" />
+                            <TextBlock Classes="mono" Width="44" VerticalAlignment="Center" Text="{Binding RateHz, StringFormat='{}{0:0} Hz'}" />
+                        </StackPanel>
                         <Border Width="1" Height="22" Background="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
-                        <Button Classes="tool ghost" Command="{Binding ZoomOutCommand}" Content="-" ToolTip.Tip="{loc:Tr 'Zoom out (Ctrl+wheel)'}" />
-                        <Button Classes="tool ghost" Command="{Binding ZoomResetCommand}" Content="{Binding ZoomText}" MinWidth="52" ToolTip.Tip="{loc:Tr 'Reset zoom'}" />
-                        <Button Classes="tool ghost" Command="{Binding ZoomInCommand}" Content="+" ToolTip.Tip="{loc:Tr 'Zoom in'}" />
-                        <Button Classes="tool ghost" x:Name="FitButton" Content="{loc:Tr 'Fit'}" />
-                        <Border Width="1" Height="22" Background="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsClassicView}">
+                            <Button Classes="tool ghost" Command="{Binding ZoomOutCommand}" Content="-" ToolTip.Tip="{loc:Tr 'Zoom out (Ctrl+wheel)'}" />
+                            <Button Classes="tool ghost" Command="{Binding ZoomResetCommand}" Content="{Binding ZoomText}" MinWidth="52" ToolTip.Tip="{loc:Tr 'Reset zoom'}" />
+                            <Button Classes="tool ghost" Command="{Binding ZoomInCommand}" Content="+" ToolTip.Tip="{loc:Tr 'Zoom in'}" />
+                            <Button Classes="tool ghost" x:Name="FitButton" Content="{loc:Tr 'Fit'}" />
+                            <Border Width="1" Height="22" Background="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
+                        </StackPanel>
                         <ToggleButton Classes="tool" IsChecked="{Binding IsRecording, Mode=OneWay}" Command="{Binding ToggleRecordCommand}" ToolTip.Tip="{loc:Tr 'Record values in memory'}">
                             <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="M12 7a5 5 0 100 10 5 5 0 000-10z" Width="13" Height="13" Foreground="{DynamicResource DangerBrush}" /><TextBlock Text="{loc:Tr 'Record'}" /></StackPanel>
                         </ToggleButton>
                         <Button Classes="tool" Command="{Binding ExportCommand}" ToolTip.Tip="{loc:Tr 'Export the recording as CSV'}" Content="{loc:Tr 'Export CSV'}" />
                         <ToggleButton Classes="tool" IsChecked="{Binding IsLogging, Mode=OneWay}" Command="{Binding ToggleLogCommand}" ToolTip.Tip="{loc:Tr 'Stream every cycle to a CSV file'}" Content="{loc:Tr 'Log to file'}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <Button Classes="tool" Command="{Binding ClearStagedCommand}" IsVisible="{Binding HasStaged}" Content="{loc:Tr 'Discard edits'}" />
-                        <Button Classes="tool danger" Command="{Binding SendStagedCommand}" IsVisible="{Binding HasStaged}" ToolTip.Tip="{loc:Tr 'Expert mode required'}" Content="{loc:Tr 'Send inputs'}" />
-                    </StackPanel>
+                    </WrapPanel>
                 </WrapPanel>
             </Border>
 
             <Border Grid.Row="1" Classes="card" Padding="0" ClipToBounds="True">
-                <Grid>
-                    <ScrollViewer x:Name="Scroller" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="{DynamicResource SurfaceAltBrush}" IsVisible="{Binding HasScreen}">
-                        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" BoxShadow="0 2 10 0 #30000000">
-                            <sc:ScreenCanvas x:Name="Canvas" Zoom="{Binding Zoom, Mode=TwoWay}" ButtonsEnabled="{Binding IsExpert}" />
-                        </Border>
-                    </ScrollViewer>
-                    <StackPanel IsVisible="{Binding !HasScreen}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="420">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid x:Name="HeaderGrid" Margin="16 10 16 6" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" IsVisible="{Binding HasScreen}">
+                        <StackPanel Spacing="1">
+                            <TextBlock Classes="h2" FontSize="16" Text="{Binding ScreenTitle}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="caption" TextTrimming="CharacterEllipsis"><Run Text="{Binding PageNote}" /><Run Text="{Binding FormSummary}" /></TextBlock>
+                        </StackPanel>
+                        <WrapPanel x:Name="HeaderTools" Grid.Column="1" ItemSpacing="8" LineSpacing="6" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <Button Classes="tool" Command="{Binding ClearStagedCommand}" IsVisible="{Binding HasStaged}" Content="{loc:Tr 'Discard edits'}" />
+                            <Button Classes="tool danger" Command="{Binding SendStagedCommand}" IsVisible="{Binding HasStaged}" ToolTip.Tip="{loc:Tr 'Expert mode required'}" Content="{loc:Tr 'Send inputs'}" />
+                            <TextBox x:Name="ControlFilterBox" Width="190" MinHeight="32" Text="{Binding ControlFilter}" Watermark="{loc:Tr 'Filter controls'}" IsVisible="{Binding IsFormView}" />
+                            <ToggleButton x:Name="ClassicToggle" Classes="tool" IsChecked="{Binding IsClassicView, Mode=TwoWay}" Content="{loc:Tr 'Classic canvas view'}" ToolTip.Tip="{loc:Tr 'Show the original DDT absolute-position layout'}" />
+                        </WrapPanel>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <ScrollViewer x:Name="FormScroller" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Background="{DynamicResource SurfaceAltBrush}">
+                            <ScrollViewer.IsVisible><MultiBinding Converter="{x:Static BoolConverters.And}"><Binding Path="HasScreen" /><Binding Path="IsFormView" /></MultiBinding></ScrollViewer.IsVisible>
+                            <sc:FormPanel x:Name="Form" Margin="12 8 12 14" Rows="{Binding Rows}" CardBrush="{DynamicResource SurfaceBrush}" CardBorderBrush="{DynamicResource BorderSubtleBrush}">
+                                <sc:FormPanel.ItemTemplate>
+                                    <sc:FormTemplateSelector>
+                                        <DataTemplate DataType="vm:FormHeadingRow" x:DataType="vm:FormHeadingRow">
+                                            <Grid ColumnDefinitions="*,Auto" Margin="4 6 4 0" VerticalAlignment="Top">
+                                                <TextBlock Classes="sectitle" Text="{Binding Title}" ToolTip.Tip="{Binding Title}" />
+                                                <Border Grid.Column="1" Classes="pill statuspill" VerticalAlignment="Center"><TextBlock Classes="caption" Text="{Binding Count}" /></Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:FormNoteRow" x:DataType="vm:FormNoteRow">
+                                            <TextBlock Margin="4 4" Classes="muted" FontSize="12.5" TextWrapping="Wrap" Text="{Binding Text}" />
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:FormDisplayRow" x:DataType="vm:FormDisplayRow">
+                                            <Button Classes="tile" Classes.selected="{Binding IsSelected}" Command="{Binding SelectCommand}" ToolTip.Tip="{Binding Tooltip}">
+                                                <Grid RowDefinitions="Auto,*">
+                                                    <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Top">
+                                                        <TextBlock Classes="tcap" Text="{Binding Caption}" />
+                                                        <TextBlock Grid.Column="1" Classes="thint" Text="{Binding Hint}" IsVisible="{Binding HasHint}" />
+                                                    </Grid>
+                                                    <sc:ValueBox Grid.Row="1" Row="{Binding}" VerticalAlignment="Bottom"  />
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:FormListInputRow" x:DataType="vm:FormListInputRow">
+                                            <Border Classes="itile" Classes.staged="{Binding IsStaged}" Classes.error="{Binding HasError}" ToolTip.Tip="{Binding Tooltip}">
+                                                <Grid RowDefinitions="Auto,Auto,*">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Top">
+                                                        <TextBlock Classes="tcap" Text="{Binding Caption}" />
+                                                        <TextBlock Grid.Column="1" Classes="thint" Text="{Binding Hint}" IsVisible="{Binding HasHint}" />
+                                                        <Border Grid.Column="2" Classes="badge" Margin="6 0 0 0" IsVisible="{Binding IsStaged}"><TextBlock Text="{loc:Tr 'EDITED'}" /></Border>
+                                                    </Grid>
+                                                    <ContentControl Grid.Row="1" Content="{Binding Reading}" IsVisible="{Binding HasReading}" Margin="0 0 0 4">
+                                                        <ContentControl.ContentTemplate>
+                                                            <DataTemplate x:DataType="vm:FormDisplayRow"><sc:ValueBox Row="{Binding}" Compact="True" Label="{loc:Tr 'Current'}" VerticalAlignment="Top" ToolTip.Tip="{Binding Tooltip}" /></DataTemplate>
+                                                        </ContentControl.ContentTemplate>
+                                                    </ContentControl>
+                                                    <ComboBox Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" ItemsSource="{Binding Choices}" SelectedItem="{Binding Text, Mode=TwoWay}" PlaceholderText="{loc:Tr 'Choose a value'}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:FormNumberInputRow" x:DataType="vm:FormNumberInputRow">
+                                            <Border Classes="itile" Classes.staged="{Binding IsStaged}" Classes.error="{Binding HasError}" ToolTip.Tip="{Binding Tooltip}">
+                                                <Grid RowDefinitions="Auto,Auto,*">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Top">
+                                                        <TextBlock Classes="tcap" Text="{Binding Caption}" />
+                                                        <TextBlock Grid.Column="1" Classes="thint" Text="{Binding Hint}" IsVisible="{Binding HasHint}" />
+                                                        <Border Grid.Column="2" Classes="badge" Margin="6 0 0 0" IsVisible="{Binding IsStaged}"><TextBlock Text="{loc:Tr 'EDITED'}" /></Border>
+                                                    </Grid>
+                                                    <ContentControl Grid.Row="1" Content="{Binding Reading}" IsVisible="{Binding HasReading}" Margin="0 0 0 4">
+                                                        <ContentControl.ContentTemplate>
+                                                            <DataTemplate x:DataType="vm:FormDisplayRow"><sc:ValueBox Row="{Binding}" Compact="True" Label="{loc:Tr 'Current'}" VerticalAlignment="Top" ToolTip.Tip="{Binding Tooltip}" /></DataTemplate>
+                                                        </ContentControl.ContentTemplate>
+                                                    </ContentControl>
+                                                    <Grid Grid.Row="2" ColumnDefinitions="*,Auto" VerticalAlignment="Bottom">
+                                                        <NumericUpDown Value="{Binding Number, Mode=TwoWay}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" Increment="{Binding Increment}" FormatString="{Binding NumberFormat}" Watermark="{loc:Tr 'Enter a value'}" FontFamily="{DynamicResource MonoFont}" HorizontalAlignment="Stretch" MinHeight="34" />
+                                                        <TextBlock Grid.Column="1" Classes="unit" Margin="8 0 2 0" Text="{Binding Unit}" IsVisible="{Binding HasUnit}" />
+                                                    </Grid>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:FormTextInputRow" x:DataType="vm:FormTextInputRow">
+                                            <Border Classes="itile" Classes.staged="{Binding IsStaged}" Classes.error="{Binding HasError}" ToolTip.Tip="{Binding Tooltip}">
+                                                <Grid RowDefinitions="Auto,Auto,*">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Top">
+                                                        <TextBlock Classes="tcap" Text="{Binding Caption}" />
+                                                        <TextBlock Grid.Column="1" Classes="thint" Text="{Binding Hint}" IsVisible="{Binding HasHint}" />
+                                                        <Border Grid.Column="2" Classes="badge" Margin="6 0 0 0" IsVisible="{Binding IsStaged}"><TextBlock Text="{loc:Tr 'EDITED'}" /></Border>
+                                                    </Grid>
+                                                    <ContentControl Grid.Row="1" Content="{Binding Reading}" IsVisible="{Binding HasReading}" Margin="0 0 0 4">
+                                                        <ContentControl.ContentTemplate>
+                                                            <DataTemplate x:DataType="vm:FormDisplayRow"><sc:ValueBox Row="{Binding}" Compact="True" Label="{loc:Tr 'Current'}" VerticalAlignment="Top" ToolTip.Tip="{Binding Tooltip}" /></DataTemplate>
+                                                        </ContentControl.ContentTemplate>
+                                                    </ContentControl>
+                                                    <TextBox Grid.Row="2" VerticalAlignment="Bottom" Classes.mono="{Binding IsMono}" Text="{Binding Text, Mode=TwoWay}" Watermark="{Binding Watermark}" MaxLength="{Binding MaxLength}" MinHeight="34" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:FormButtonsRow" x:DataType="vm:FormButtonsRow">
+                                            <ItemsControl ItemsSource="{Binding Buttons}" Margin="0 2 0 0">
+                                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel ItemSpacing="8" LineSpacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:FormButtonItem">
+                                                        <Button Classes="wbtn" Classes.write="{Binding IsWrite}" Classes.locked="{Binding Locked}" Width="{Binding Width}" Command="{Binding PressCommand}" ToolTip.Tip="{Binding Tooltip}" HorizontalContentAlignment="Center">
+                                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                <PathIcon Data="M12 17a2 2 0 100-4 2 2 0 000 4zm6-9h-1V6a5 5 0 00-10 0v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6a3 3 0 016 0v2H9V6z" Width="11" Height="11" IsVisible="{Binding Locked}" />
+                                                                <TextBlock Text="{Binding Text}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:FormSendBarRow" x:DataType="vm:FormSendBarRow">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" Margin="2 6 2 0" VerticalAlignment="Top">
+                                                <TextBlock Classes="caption" VerticalAlignment="Center" Text="{Binding Summary}" TextTrimming="CharacterEllipsis" />
+                                                <Button Grid.Column="1" Classes="tool" Margin="0 0 6 0" Content="{loc:Tr 'Discard'}" Command="{Binding DiscardCommand}" IsEnabled="{Binding HasStaged}" />
+                                                <Button Grid.Column="2" Classes="tool danger" Command="{Binding SendCommand}" IsEnabled="{Binding HasStaged}" ToolTip.Tip="{loc:Tr 'Expert mode required'}" Content="{loc:Tr 'Send'}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </sc:FormTemplateSelector>
+                                </sc:FormPanel.ItemTemplate>
+                            </sc:FormPanel>
+                        </ScrollViewer>
+                        <TextBlock IsVisible="{Binding NoMatches}" Classes="muted" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{loc:Tr 'No controls match the filter'}" />
+                        <ScrollViewer x:Name="Scroller" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="{DynamicResource SurfaceAltBrush}">
+                            <ScrollViewer.IsVisible><MultiBinding Converter="{x:Static BoolConverters.And}"><Binding Path="HasScreen" /><Binding Path="IsClassicView" /></MultiBinding></ScrollViewer.IsVisible>
+                            <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" BoxShadow="0 2 10 0 #30000000">
+                                <sc:ScreenCanvas x:Name="Canvas" Zoom="{Binding Zoom, Mode=TwoWay}" ButtonsEnabled="{Binding IsExpert}" />
+                            </Border>
+                        </ScrollViewer>
+                    </Grid>
+                    <StackPanel Grid.RowSpan="2" IsVisible="{Binding !HasScreen}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="420">
                         <PathIcon Data="{x:Static svc:Icons.Screens}" Width="40" Height="40" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
                         <TextBlock Classes="h2" Text="{Binding EmptyTitle}" HorizontalAlignment="Center" />
                         <TextBlock Classes="muted" Text="{Binding EmptyText}" TextWrapping="Wrap" TextAlignment="Center" />
@@ -87,21 +242,20 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="2" Classes="card" Padding="12 10">
-                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="230,*" ColumnSpacing="16" RowSpacing="8">
-                    <StackPanel Spacing="3">
+            <Border Grid.Row="2" Classes="card" Padding="12 8">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="230,*" ColumnSpacing="16" RowSpacing="6">
+                    <StackPanel Spacing="3" IsVisible="{Binding HasSelection}">
                         <TextBlock Classes="caption" Text="{loc:Tr 'Selected value (click a display)'}" />
-                        <TextBlock Classes="h2" Text="{Binding SelectedName}" TextTrimming="CharacterEllipsis" IsVisible="{Binding HasSelection}" />
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding SelectedValue}" IsVisible="{Binding HasSelection}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Classes="caption mono" Text="{Binding SelectedRange}" TextWrapping="Wrap" IsVisible="{Binding HasSelection}" />
-                        <TextBlock Classes="muted" Text="{loc:Tr 'No display selected'}" IsVisible="{Binding !HasSelection}" />
+                        <TextBlock Classes="h2" Text="{Binding SelectedName}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" FontFamily="{DynamicResource MonoFont}" Text="{Binding SelectedValue}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="caption mono" Text="{Binding SelectedRange}" TextWrapping="Wrap" />
                     </StackPanel>
-                    <sc:SparklineControl Grid.Column="1" x:Name="Spark" Height="84" Stroke="{DynamicResource SystemControlHighlightAccentBrush}" TextBrush="{DynamicResource TextMutedBrush}" GridBrush="{DynamicResource BorderSubtleBrush}" />
-                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Classes="caption" Text="{Binding WriteHint}" Foreground="{DynamicResource WarningBrush}" TextTrimming="CharacterEllipsis" />
-                    <DockPanel Grid.Row="2" Grid.ColumnSpan="2">
+                    <sc:SparklineControl Grid.Column="1" x:Name="Spark" Height="96" IsVisible="{Binding HasSelection}" Stroke="{DynamicResource SystemControlHighlightAccentBrush}" TextBrush="{DynamicResource TextMutedBrush}" GridBrush="{DynamicResource BorderSubtleBrush}" />
+                    <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
                         <TextBlock DockPanel.Dock="Right" Classes="caption mono" Text="{Binding PerfText}" />
                         <TextBlock DockPanel.Dock="Right" Classes="caption" Text="{Binding RecordedText}" Margin="0 0 16 0" />
-                        <TextBlock Classes="caption" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock DockPanel.Dock="Left" Classes="caption" Text="{Binding StatusText}" Margin="0 0 14 0" MaxWidth="360" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="caption" Text="{Binding WriteHint}" Foreground="{DynamicResource WarningBrush}" TextTrimming="CharacterEllipsis" />
                     </DockPanel>
                 </Grid>
             </Border>

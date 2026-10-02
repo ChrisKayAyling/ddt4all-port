@@ -47,6 +47,8 @@ public sealed class ScreenLiveEngine : IDisposable
     private readonly int[] _histCount;
     private readonly int[] _histHead;
     private readonly bool[] _isDirty;
+    private readonly byte[] _status;          // 0 waiting, 1 ok, 2 error
+    private readonly double[] _min, _max;     // running min/max of the numeric value since the engine was created
     private List<int> _dirty = new();
 
     private CancellationTokenSource? _cts;
@@ -68,6 +70,8 @@ public sealed class ScreenLiveEngine : IDisposable
         _hist = new double[n][];
         _histCount = new int[n]; _histHead = new int[n];
         _isDirty = new bool[n];
+        _status = new byte[n];
+        _min = new double[n]; _max = new double[n]; Array.Fill(_min, double.NaN); Array.Fill(_max, double.NaN);
         BuildGroups();
     }
 
@@ -238,8 +242,14 @@ public sealed class ScreenLiveEngine : IDisposable
                 if (_histCount[slot] < HistoryLength) _histCount[slot]++;
             }
             _value[slot] = num;
-            if (_text[slot] == text) return;
-            _text[slot] = text;
+            if (!double.IsNaN(num))
+            {
+                if (double.IsNaN(_min[slot]) || num < _min[slot]) _min[slot] = num;
+                if (double.IsNaN(_max[slot]) || num > _max[slot]) _max[slot] = num;
+            }
+            byte status = text is null ? (byte)2 : (byte)1;
+            if (_text[slot] == text && _status[slot] == status) return;
+            _text[slot] = text; _status[slot] = status;
             if (!_isDirty[slot]) { _isDirty[slot] = true; _dirty.Add(slot); }
         }
     }
@@ -261,6 +271,22 @@ public sealed class ScreenLiveEngine : IDisposable
 
     public string? GetText(int slot) { lock (_lock) return _text[slot]; }
     public double GetValue(int slot) { lock (_lock) return _value[slot]; }
+    /// <summary>0 = nothing received yet, 1 = decoded value, 2 = the last poll failed / no value.</summary>
+    public int GetStatus(int slot) { lock (_lock) return _status[slot]; }
+    /// <summary>Running min/max of a numeric display (NaN when it never had a numeric value).</summary>
+    public (double Min, double Max) GetMinMax(int slot) { lock (_lock) return (_min[slot], _max[slot]); }
+    /// <summary>The newest <paramref name="max"/> history samples of a slot (oldest first), without allocating.</summary>
+    public int CopyRecent(int slot, Span<double> dest)
+    {
+        lock (_lock)
+        {
+            var h = _hist[slot]; int n = Math.Min(_histCount[slot], dest.Length);
+            if (h is null || n == 0) return 0;
+            int start = (_histHead[slot] - n + HistoryLength) % HistoryLength;
+            for (int i = 0; i < n; i++) dest[i] = h[(start + i) % HistoryLength];
+            return n;
+        }
+    }
 
     /// <summary>Oldest-to-newest history of numeric values of a slot.</summary>
     public void CopyHistory(int slot, List<double> into)
