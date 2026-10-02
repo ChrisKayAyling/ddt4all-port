@@ -100,5 +100,61 @@ public class RealServicesTests : IDisposable
         await conn.DisconnectAsync();
     }
 
+    [AvaloniaFact]
+    public async Task Browser_open_ecu_loads_session_and_navigates_to_screens()
+    {
+        using var sp = Create();
+        var catalog = sp.GetRequiredService<IEcuCatalogService>();
+        var real = Environment.GetEnvironmentVariable("DDT4ALL_REAL_ZIP");   // optional: run against a real ecu.zip
+        await catalog.SetDatabasePathAsync(real ?? _zip);
+        var nav = new Nav();
+        var screens = new Ddt4All.App.ViewModels.Screens.ScreensViewModel(sp.GetRequiredService<SessionState>(),
+            sp.GetRequiredService<Ddt4All.App.ViewModels.Screens.IScreenSession>(), sp.GetRequiredService<INotificationService>(),
+            sp.GetRequiredService<IDialogService>(), sp.GetRequiredService<IFilePickerService>(), nav);
+        screens.OnNavigatedTo();
+        var vm = new EcuBrowserViewModel(catalog, nav, sp.GetRequiredService<INotificationService>(), sp.GetRequiredService<SessionState>(),
+            sp.GetRequiredService<ISettingsService>(), null, sp.GetRequiredService<IEcuSession>(), sp.GetRequiredService<IFilePickerService>());
+        vm.OnNavigatedTo();
+        for (int i = 0; i < 100 && vm.Rows.Count == 0; i++) { await Task.Delay(50); TestApp.Pump(); }
+        Assert.NotEmpty(vm.Rows);
+        var entry = vm.Rows.OfType<Ddt4All.App.Models.EcuEntry>().First(e => real is not null || e.Name == "RICH_ECU");
+        vm.SelectedRow = entry;
+        var open = vm.OpenEcuCommand.ExecuteAsync(null);
+        var done = await Task.WhenAny(open, Task.Delay(10000));
+        TestApp.Pump();
+        Assert.Same(open, done);                       // must not hang
+        await open;
+        Assert.True(sp.GetRequiredService<IEcuSession>().IsLoaded);
+        Assert.Equal(PageId.Screens, nav.Last);
+    }
+
+    [AvaloniaFact]
+    public async Task Browser_open_button_is_wired_even_when_datacontext_arrives_late()
+    {
+        using var sp = Create();
+        var catalog = sp.GetRequiredService<IEcuCatalogService>();
+        await catalog.SetDatabasePathAsync(_zip);
+        var nav = new Nav();
+        var vm = new EcuBrowserViewModel(catalog, nav, sp.GetRequiredService<INotificationService>(), sp.GetRequiredService<SessionState>(),
+            sp.GetRequiredService<ISettingsService>(), null, sp.GetRequiredService<IEcuSession>(), sp.GetRequiredService<IFilePickerService>());
+        var view = new Ddt4All.App.Views.EcuBrowserView();
+        var window = new Avalonia.Controls.Window { Content = view, Width = 1100, Height = 700 };
+        window.Show();
+        TestApp.Pump();
+        view.DataContext = vm;                           // DataContext after the view is already in the tree
+        vm.OnNavigatedTo();
+        for (int i = 0; i < 100 && vm.Rows.Count == 0; i++) { await Task.Delay(50); TestApp.Pump(); }
+        vm.SelectedRow = vm.Rows.OfType<Ddt4All.App.Models.EcuEntry>().First(e => e.Name == "RICH_ECU");
+        TestApp.Pump();
+        var button = Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(view).OfType<Avalonia.Controls.Button>()
+            .First(b => b.Content?.ToString() == "Open ECU");
+        Assert.NotNull(button.Command);                  // fails when the command binding resolved against a null DataContext
+        Assert.True(button.Command!.CanExecute(button.CommandParameter));
+        button.Command.Execute(button.CommandParameter);
+        for (int i = 0; i < 100 && nav.Last is null; i++) { await Task.Delay(50); TestApp.Pump(); }
+        Assert.Equal(PageId.Screens, nav.Last);
+        window.Close();
+    }
+
     private sealed class Nav : INavigationService { public PageId? Last; public void NavigateTo(PageId page) => Last = page; }
 }

@@ -33,7 +33,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:TerminalLine">
                         <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="6 2" ColumnSpacing="10">
-                            <TextBlock Classes="tl" Text="{Binding TimeText}" Opacity="0.55" IsVisible="{Binding $parent[v:TerminalView].Vm.ShowTimestamps}" />
+                            <TextBlock Classes="tl" Text="{Binding TimeText}" Opacity="0.55" IsVisible="{Binding $parent[v:TerminalView].((vm:TerminalViewModel)DataContext).ShowTimestamps}" />
                             <TextBlock Grid.Column="1" Classes="tl" Classes.req="{Binding IsRequest}" Classes.resp="{Binding IsResponse}" Classes.err="{Binding IsError}" Text="{Binding Prefix}" FontWeight="Bold" />
                             <TextBlock Grid.Column="2" Classes="tl" Classes.req="{Binding IsRequest}" Classes.resp="{Binding IsResponse}" Classes.err="{Binding IsError}" Text="{Binding Text}" TextWrapping="Wrap" />
                             <TextBlock Grid.Column="3" Classes="tl" Text="{Binding Duration}" Opacity="0.5" FontSize="11" />
@@ -48,7 +48,7 @@
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
-                        <Button Classes="chip" Margin="0 0 6 6" Content="{Binding}" Command="{Binding $parent[v:TerminalView].Vm.UseQuickCommand}" CommandParameter="{Binding}" />
+                        <Button Classes="chip" Margin="0 0 6 6" Content="{Binding}" Command="{Binding $parent[v:TerminalView].((vm:TerminalViewModel)DataContext).UseQuickCommand}" CommandParameter="{Binding}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

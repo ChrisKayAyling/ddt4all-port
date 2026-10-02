@@ -115,7 +115,7 @@
                             <TextBlock Text="{Binding File}" Classes="mono" FontSize="12" TextWrapping="Wrap" />
                         </StackPanel>
                         <Button Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Height="36"
-                                Command="{Binding $parent[v:EcuBrowserView].Vm.OpenEcuCommand}" CommandParameter="{Binding}" Content="{loc:Tr 'Open ECU'}" />
+                                Command="{Binding $parent[v:EcuBrowserView].((vm:EcuBrowserViewModel)DataContext).OpenEcuCommand}" CommandParameter="{Binding}" Content="{loc:Tr 'Open ECU'}" />
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
