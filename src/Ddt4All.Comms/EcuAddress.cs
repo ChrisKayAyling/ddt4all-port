@@ -25,6 +25,8 @@ public enum CanSpeed
     Kbps250 = 2,
     /// <summary>Try 250k first and fall back to 500k when the adapter reports CAN ERROR (Python "double BRP").</summary>
     Auto = 3,
+    /// <summary>125k: Ford MS-CAN (OBD pins 3/11). Needs an adapter that can reach those pins (hardware switch, vLinker FS, OBDLink EX).</summary>
+    Kbps125 = 4,
 }
 
 /// <summary>

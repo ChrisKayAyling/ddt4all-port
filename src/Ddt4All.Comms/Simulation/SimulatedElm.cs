@@ -20,6 +20,8 @@ public sealed class SimulatedElmOptions
     public double Voltage { get; set; } = 12.4;
     /// <summary>Real delay before answering each command (exercise host timeouts).</summary>
     public TimeSpan Latency { get; set; }
+    /// <summary>Picks the physical bus for the active protocol letter (e.g. 'B' -> MS-CAN bus). Null: the single bus given to the constructor.</summary>
+    public Func<char, SimulatedBus>? BusSelector { get; set; }
 }
 
 /// <summary>
@@ -54,7 +56,7 @@ public sealed class SimulatedElm : IAsyncDisposable
 
     public SimulatedElm(InMemorySerialLink deviceEnd, SimulatedBus bus, SimulatedElmOptions? options = null)
     {
-        _link = deviceEnd; _hostEnd = deviceEnd.Peer; Bus = bus; Options = options ?? new SimulatedElmOptions();
+        _link = deviceEnd; _hostEnd = deviceEnd.Peer; _bus = bus; Options = options ?? new SimulatedElmOptions();
         _loop = Task.Run(RunAsync);
     }
 
@@ -65,7 +67,8 @@ public sealed class SimulatedElm : IAsyncDisposable
         return (host, new SimulatedElm(dev, bus, options));
     }
 
-    public SimulatedBus Bus { get; }
+    private readonly SimulatedBus _bus;
+    public SimulatedBus Bus => Options.BusSelector?.Invoke(_protocol) ?? _bus;
     public SimulatedElmOptions Options { get; }
 
     /// <summary>Every command line received (upper-cased, as typed), for test assertions.</summary>
@@ -215,6 +218,7 @@ public sealed class SimulatedElm : IAsyncDisposable
             return new List<string> { "?" };
         }
         if (c.StartsWith("SH", StringComparison.Ordinal)) { _sh = c[2..]; return IsHex(_sh) && _sh.Length is 3 or 6 or 8 ? Ok() : new List<string> { "?" }; }
+        if (c.StartsWith("PB", StringComparison.Ordinal)) return Ok();
         if (c.StartsWith("CP", StringComparison.Ordinal)) { _cp = c[2..]; return Ok(); }
         if (c.StartsWith("CRA", StringComparison.Ordinal)) { _cra = c.Length > 3 ? c[3..] : null; return Ok(); }
         if (c.StartsWith("CF", StringComparison.Ordinal) || c.StartsWith("CM", StringComparison.Ordinal)) return Ok();
@@ -251,11 +255,12 @@ public sealed class SimulatedElm : IAsyncDisposable
         '7' => "ISO 15765-4 (CAN 29/500)",
         '8' => "ISO 15765-4 (CAN 11/250)",
         '9' => "ISO 15765-4 (CAN 29/250)",
+        'B' => "USER1 CAN (11* bit ID, 125* Kbaud)",
         _ => "AUTOMATIC",
     };
 
-    private bool IsCan => _protocol is '6' or '7' or '8' or '9' or 'A' or '0';
-    private int ProtocolSpeed => _protocol is '8' or '9' ? 250 : 500;
+    private bool IsCan => _protocol is '6' or '7' or '8' or '9' or 'A' or '0' or 'B';
+    private int ProtocolSpeed => _protocol is '8' or '9' ? 250 : _protocol == 'B' ? 125 : 500;
 
     // ---- speed switching ----
     private List<string> BaudSwitchElm(string divHex, ref bool prompt, StringBuilder sb)
@@ -307,6 +312,7 @@ public sealed class SimulatedElm : IAsyncDisposable
             });
             return new List<string>();
         }
+        if (c.Replace(" ", "") == "P53") { _protocol = 'B'; return Ok(); }
         if (c == "MA") { var sb = new StringBuilder(); return StartMonitor(ref prompt, sb); }
         return new List<string> { "?" };
     }

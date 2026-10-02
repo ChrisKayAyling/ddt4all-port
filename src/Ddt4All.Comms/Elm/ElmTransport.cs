@@ -337,6 +337,16 @@ public sealed partial class ElmTransport : IAddressableTransport
 
         switch (e.Speed)
         {
+            case CanSpeed.Kbps125:
+                // Ford MS-CAN. STN: preset 53 = ISO 15765 11-bit 125k on the MS-CAN pins (OBDLink FRPM). ELM: user protocol B (11-bit, 125k).
+                if (e.Is29Bit) throw new NotSupportedException("29-bit MS-CAN is not supported.");
+                if (Info.IsStn) await AtOkAsync("STP 53", ct).ConfigureAwait(false);
+                else
+                {
+                    await AtOkAsync("ATPB E004", ct).ConfigureAwait(false); // options E0 (11-bit, var. DLC), divisor 04 = 500/4 kbps
+                    await AtOkAsync("ATSP B", ct).ConfigureAwait(false);
+                }
+                break;
             case CanSpeed.Kbps250: await AtOkAsync("ATSP " + (e.Is29Bit ? "9" : "8"), ct).ConfigureAwait(false); break;
             case CanSpeed.Auto:
                 await AtOkAsync("ATSP " + (e.Is29Bit ? "9" : "8"), ct).ConfigureAwait(false);
