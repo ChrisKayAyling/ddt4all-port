@@ -53,7 +53,7 @@ jobs:
                       print(f"::error title=FAILED {r.get('testName')}::{msg}")
           import re
           for line in open("test.log", errors="replace"):
-              if re.search(r"(Failed|Aborted|crash|error|Exception|Unhandled|exit code)", line, re.I) and "warning" not in line.lower():
+              if not line.strip().startswith(("Passed", "Skipped")) and re.search(r"(Failed|Aborted|crash|error|Exception|Unhandled|exit code|Unable|denied|cannot)", line, re.I) and "warning" not in line.lower():
                   print("::error title=LOG::" + line.strip()[:300])
       - uses: actions/upload-artifact@v4
         if: always()
