@@ -23,6 +23,7 @@ public sealed class SimulatedDoIpGateway : IAsyncDisposable
         _tcp = new TcpListener(IPAddress.Loopback, 0);
         _tcp.Start();
         _udp = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+        DoIpDiscovery.DisableUdpConnReset(_udp);
         _tasks.Add(Task.Run(AcceptLoopAsync));
         _tasks.Add(Task.Run(UdpLoopAsync));
     }

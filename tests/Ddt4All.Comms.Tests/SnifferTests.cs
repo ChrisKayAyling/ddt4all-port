@@ -111,7 +111,7 @@ public class SnifferTests
     public async Task Slow_consumer_drops_oldest_frames_instead_of_blocking()
     {
         await using var rig = await TestRig.CreateAsync(b => b.Add(new FakeCanEcu("E", 0x7E0, 0x7E8, new EcuScript())));
-        var sniffer = new CanSniffer(rig.Elm, new SnifferOptions { QueueCapacity = 16 });
+        var sniffer = new CanSniffer(rig.Elm, new SnifferOptions { QueueCapacity = 4 });
         using var gen = new CancellationTokenSource();
         var genTask = Task.Run(async () =>
         {
@@ -121,11 +121,11 @@ public class SnifferTests
         int n = 0;
         await foreach (var _ in sniffer.FramesAsync())
         {
-            await Task.Delay(100);   // very slow UI
+            await Task.Delay(250);   // very slow UI (generous: Windows timers tick ~15 ms)
             if (++n == 2) break;
         }
         gen.Cancel(); await genTask;
         Assert.True(sniffer.DroppedFrames > 0);
-        Assert.True(sniffer.ReceivedFrames > 16);
+        Assert.True(sniffer.ReceivedFrames > 4);
     }
 }

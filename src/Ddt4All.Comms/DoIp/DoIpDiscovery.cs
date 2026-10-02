@@ -15,6 +15,7 @@ public static class DoIpDiscovery
     {
         target ??= new IPEndPoint(IPAddress.Broadcast, DoIpFraming.DefaultPort);
         using var udp = new UdpClient(target.AddressFamily) { EnableBroadcast = true };
+        DisableUdpConnReset(udp);
         udp.Client.Bind(new IPEndPoint(target.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
         var request = DoIpFraming.Build(DoIpPayloadType.VehicleIdentificationRequest, ReadOnlySpan<byte>.Empty);
         await udp.SendAsync(request, target, ct).ConfigureAwait(false);
@@ -38,6 +39,18 @@ public static class DoIpDiscovery
             catch (ProtocolException) { /* ignore garbage */ }
             if (vehicle is not null && seen.Add(vehicle.EidHex + vehicle.LogicalAddress)) yield return vehicle;
         }
+    }
+
+    /// <summary>
+    /// Windows reports an ICMP "port unreachable" reply to an earlier send as WSAECONNRESET on the next
+    /// receive, which would abort discovery. SIO_UDP_CONNRESET = off restores the normal UDP behaviour.
+    /// </summary>
+    internal static void DisableUdpConnReset(UdpClient udp)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        const int SIO_UDP_CONNRESET = -1744830452;
+        try { udp.Client.IOControl(SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null); }
+        catch (SocketException) { /* best effort */ }
     }
 
     /// <summary>First entity found, or null on timeout.</summary>
