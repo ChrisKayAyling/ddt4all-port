@@ -35,6 +35,18 @@ jobs:
       - run: dotnet build Ddt4All.sln -c Release --no-restore
       # Benchmarks project is built but not executed.
       - run: dotnet test Ddt4All.sln -c Release --no-build --logger "trx;LogFileName=test.trx" --results-directory TestResults
+      - name: Report failed tests as annotations
+        if: failure()
+        shell: python
+        run: |
+          import glob, xml.etree.ElementTree as ET
+          ns = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}
+          for f in glob.glob("**/*.trx", recursive=True):
+              for r in ET.parse(f).getroot().iterfind(".//t:UnitTestResult", ns):
+                  if r.get("outcome") == "Failed":
+                      m = r.find(".//t:Message", ns)
+                      msg = " ".join((m.text or "").split())[:400] if m is not None else ""
+                      print(f"::error title=FAILED {r.get('testName')}::{msg}")
       - uses: actions/upload-artifact@v4
         if: always()
         with:
