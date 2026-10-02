@@ -1,0 +1,151 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Ddt4All.App.ViewModels"
+        xmlns:svc="using:Ddt4All.App.Services"
+        xmlns:loc="using:Ddt4All.App.Localization"
+        x:Class="Ddt4All.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding WindowTitle}"
+        Width="1280" Height="780" MinWidth="980" MinHeight="620"
+        Background="{DynamicResource AppBgBrush}"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <DataTemplate x:Key="NavItemTemplate" x:DataType="vm:NavItem">
+            <Button Classes="nav" Classes.active="{Binding IsActive}" Command="{Binding ActivateCommand}" Margin="8 1" ToolTip.Tip="{Binding Title}">
+                <Grid ColumnDefinitions="3,Auto,*">
+                    <Border Classes="indicator" Width="3" Height="18" CornerRadius="2" Background="{DynamicResource SystemControlHighlightAccentBrush}" VerticalAlignment="Center" />
+                    <PathIcon Grid.Column="1" Data="{Binding Icon}" Width="18" Height="18" Margin="11 0 12 0" />
+                    <TextBlock Grid.Column="2" Classes="navlabel" Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </Button>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="Border.rail"><Setter Property="Width" Value="232" /><Setter Property="Transitions"><Transitions><DoubleTransition Property="Width" Duration="0:0:0.14" Easing="CubicEaseOut" /></Transitions></Setter></Style>
+        <Style Selector="Border.rail.collapsed"><Setter Property="Width" Value="60" /></Style>
+        <Style Selector="Border.rail.collapsed TextBlock.navlabel"><Setter Property="IsVisible" Value="False" /></Style>
+        <Style Selector="Border.rail.collapsed StackPanel.brand"><Setter Property="IsVisible" Value="False" /></Style>
+
+        <Style Selector="Button.statusbtn">
+            <Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="8 0" /><Setter Property="Height" Value="26" /><Setter Property="MinHeight" Value="0" />
+            <Setter Property="FontSize" Value="12" /><Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="Button.expertbtn">
+            <Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+            <Setter Property="Padding" Value="8 0" /><Setter Property="Height" Value="22" /><Setter Property="MinHeight" Value="0" />
+            <Setter Property="FontSize" Value="11" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="CornerRadius" Value="11" />
+        </Style>
+        <Style Selector="Button.expertbtn.expert /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource DangerBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" /><Setter Property="TextElement.Foreground" Value="White" /></Style>
+        <Style Selector="Button.expertbtn.expert:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource DangerBrush}" /><Setter Property="Opacity" Value="0.9" /><Setter Property="TextElement.Foreground" Value="White" /></Style>
+        <Style Selector="Button.expertbtn.expert PathIcon"><Setter Property="Foreground" Value="White" /></Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- expert-mode banner -->
+        <Border Grid.Row="0" IsVisible="{Binding Session.IsExpertMode}" Background="{DynamicResource DangerBrush}" Padding="16 5">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding ToggleExpertModeCommand}" Foreground="White" Padding="10 2" MinHeight="0" FontSize="12" BorderBrush="White" BorderThickness="1">
+                    <TextBlock Text="{loc:Tr 'Disable'}" />
+                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <PathIcon Data="{x:Static svc:Icons.Warning}" Width="14" Height="14" Foreground="White" />
+                    <TextBlock Foreground="White" FontWeight="SemiBold" FontSize="12" Text="{loc:Tr 'EXPERT MODE ACTIVE - write operations are enabled. You are responsible for every request sent.'}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
+            <!-- navigation rail -->
+            <Border Grid.Column="0" Classes="rail" Classes.collapsed="{Binding !IsNavExpanded}"
+                    Background="{DynamicResource NavBgBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 0 1 0" ClipToBounds="True">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Height="56" ColumnDefinitions="*,Auto" Margin="8 4 8 4">
+                        <StackPanel Classes="brand" Orientation="Horizontal" Spacing="10" Margin="6 0 0 0" VerticalAlignment="Center" IsHitTestVisible="False">
+                            <Border Width="28" Height="28" CornerRadius="8" Background="{DynamicResource SystemControlHighlightAccentBrush}">
+                                <PathIcon Data="{x:Static svc:Icons.Ecu}" Width="16" Height="16" Foreground="White" />
+                            </Border>
+                            <TextBlock Text="{Binding AppTitle}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="ghost" Command="{Binding ToggleNavCommand}" Width="40" Height="40" Padding="0" HorizontalAlignment="Right"
+                                ToolTip.Tip="{loc:Tr 'Collapse / expand navigation'}">
+                            <PathIcon Data="{x:Static svc:Icons.Menu}" Width="18" Height="18" />
+                        </Button>
+                    </Grid>
+                    <ItemsControl DockPanel.Dock="Bottom" ItemTemplate="{StaticResource NavItemTemplate}" ItemsSource="{Binding FooterItems}" Margin="0 0 0 8">
+                        
+                    </ItemsControl>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemTemplate="{StaticResource NavItemTemplate}" ItemsSource="{Binding MainItems}" Margin="0 4 0 0">
+                            
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- page host -->
+            <TransitioningContentControl Grid.Column="1" Content="{Binding CurrentPage}">
+                <TransitioningContentControl.PageTransition>
+                    <CrossFade Duration="0:0:0.12" />
+                </TransitioningContentControl.PageTransition>
+            </TransitioningContentControl>
+        </Grid>
+
+        <!-- status bar -->
+        <Border Grid.Row="2" Height="30" Background="{DynamicResource NavBgBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 1 0 0" Padding="8 0">
+            <DockPanel LastChildFill="False">
+                <Button DockPanel.Dock="Left" Classes="statusbtn" Command="{Binding GoToConnectCommand}" ToolTip.Tip="{loc:Tr 'Connection'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Panel Width="10" Height="10" VerticalAlignment="Center">
+                            <Ellipse IsVisible="{Binding IsConnected}" Fill="{DynamicResource SuccessBrush}" />
+                            <Ellipse IsVisible="{Binding IsConnecting}" Fill="{DynamicResource WarningBrush}" />
+                            <Ellipse IsVisible="{Binding IsFailed}" Fill="{DynamicResource DangerBrush}" />
+                            <Ellipse IsVisible="{Binding IsDisconnected}" Fill="{DynamicResource TextMutedBrush}" Opacity="0.55" />
+                        </Panel>
+                        <TextBlock Text="{Binding ConnectionText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Rectangle DockPanel.Dock="Left" Width="1" Height="14" Fill="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
+                <TextBlock DockPanel.Dock="Left" Classes="caption" Text="{Binding EcuText}" VerticalAlignment="Center" Margin="8 0" />
+
+                <TextBlock DockPanel.Dock="Right" Classes="caption" Text="v1.0.0" VerticalAlignment="Center" Margin="8 0 4 0" />
+                <Button DockPanel.Dock="Right" Classes="expertbtn" Classes.expert="{Binding Session.IsExpertMode}" Command="{Binding ToggleExpertModeCommand}"
+                        ToolTip.Tip="{loc:Tr 'Expert mode (enable writing)'}" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <PathIcon Data="{x:Static svc:Icons.Shield}" Width="12" Height="12" />
+                        <TextBlock Text="{Binding ExpertText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </DockPanel>
+        </Border>
+
+        <!-- toasts -->
+        <ItemsControl Grid.Row="0" Grid.RowSpan="3" ItemsSource="{Binding Notifications.Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0 0 16 44">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="svc:Toast">
+                    <Border Classes="toast">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <Panel VerticalAlignment="Top" Margin="0 1 0 0">
+                                <PathIcon IsVisible="{Binding IsInfo}" Data="{x:Static svc:Icons.Info}" Foreground="{DynamicResource SystemControlHighlightAccentBrush}" Width="18" Height="18" />
+                                <PathIcon IsVisible="{Binding IsSuccess}" Data="{x:Static svc:Icons.CheckCircle}" Foreground="{DynamicResource SuccessBrush}" Width="18" Height="18" />
+                                <PathIcon IsVisible="{Binding IsWarning}" Data="{x:Static svc:Icons.Warning}" Foreground="{DynamicResource WarningBrush}" Width="18" Height="18" />
+                                <PathIcon IsVisible="{Binding IsError}" Data="{x:Static svc:Icons.Error}" Foreground="{DynamicResource DangerBrush}" Width="18" Height="18" />
+                            </Panel>
+                            <StackPanel Grid.Column="1" Spacing="2">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Message}" IsVisible="{Binding HasMessage}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="2" Classes="ghost" Command="{Binding DismissCommand}" Width="24" Height="24" Padding="0" VerticalAlignment="Top" MinHeight="0">
+                                <PathIcon Data="{x:Static svc:Icons.Close}" Width="10" Height="10" />
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</Window>

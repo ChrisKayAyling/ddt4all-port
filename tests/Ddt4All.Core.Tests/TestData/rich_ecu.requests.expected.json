@@ -1,0 +1,133 @@
+{
+ "build": [
+  {
+   "request": "WriteConfig",
+   "inputs": {},
+   "stream": "2E0100000000"
+  },
+  {
+   "request": "WriteConfig",
+   "inputs": {
+    "Mode": "ON"
+   },
+   "stream": "2E0101000000"
+  },
+  {
+   "request": "WriteConfig",
+   "inputs": {
+    "Mode": "OFF",
+    "Offset": "12.5"
+   },
+   "stream": "2E0102140000"
+  },
+  {
+   "request": "WriteConfig",
+   "inputs": {
+    "Mode": "02",
+    "Offset": "-3",
+    "Bits": "5"
+   },
+   "stream": "EXC"
+  },
+  {
+   "request": "WriteConfig",
+   "inputs": {
+    "Offset": "100",
+    "Bits": "7"
+   },
+   "stream": "2E0100C30038"
+  },
+  {
+   "request": "WriteConfig",
+   "inputs": {
+    "Mode": "1"
+   },
+   "stream": "2E0101000000"
+  },
+  {
+   "request": "Reset",
+   "inputs": {},
+   "stream": "3101FF00"
+  }
+ ],
+ "decode": [
+  {
+   "request": "ReadData",
+   "frame": "61 01 A0 12 34 01 05 3C 80 FF 56 46 31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36 37",
+   "values": {
+    "Coolant": "-39",
+    "Rpm": "10244.50",
+    "Gear": "34",
+    "FlagBits": "00",
+    "Temp16": "134.0",
+    "VIN": "VF1234567890123",
+    "LeVal": "0101"
+   }
+  },
+  {
+   "request": "ReadData",
+   "frame": "61 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00",
+   "values": {
+    "Coolant": "-40",
+    "Rpm": "0.00",
+    "Gear": "Neutral",
+    "FlagBits": "00",
+    "Temp16": "0.0",
+    "VIN": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+    "LeVal": "0000"
+   }
+  },
+  {
+   "request": "ReadData",
+   "frame": "61 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF",
+   "values": {
+    "Coolant": "215",
+    "Rpm": "16383.75",
+    "Gear": "Reverse",
+    "FlagBits": "03",
+    "Temp16": "-0.1",
+    "VIN": "",
+    "LeVal": "ffff"
+   }
+  },
+  {
+   "request": "ReadData",
+   "frame": "61 3C 20 00 FF 18 FF 38 00 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4F 50 51",
+   "values": {
+    "Coolant": "20",
+    "Rpm": "2048.00",
+    "Gear": "Reverse",
+    "FlagBits": "03",
+    "Temp16": "-20.0",
+    "VIN": "\u0000ABCDEFGHIJKLMNOP",
+    "LeVal": "3c3c"
+   }
+  },
+  {
+   "request": "ReadData",
+   "frame": "61 3C 20 00 01 FF 80 00 00",
+   "values": {
+    "Coolant": "20",
+    "Rpm": "2048.00",
+    "Gear": "First",
+    "FlagBits": "03",
+    "Temp16": "-3276.8",
+    "VIN": null,
+    "LeVal": "3c3c"
+   }
+  },
+  {
+   "request": "ReadData",
+   "frame": "61 3C",
+   "values": {
+    "Coolant": "20",
+    "Rpm": null,
+    "Gear": null,
+    "FlagBits": null,
+    "Temp16": null,
+    "VIN": null,
+    "LeVal": null
+   }
+  }
+ ]
+}

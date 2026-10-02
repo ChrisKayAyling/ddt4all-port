@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.PlaceholderView"
+             x:DataType="vm:PlaceholderPageViewModel">
+    <ScrollViewer>
+        <Border Classes="card" MaxWidth="640" Margin="32 40" Padding="32" VerticalAlignment="Top" HorizontalAlignment="Center">
+            <StackPanel Spacing="18">
+                <StackPanel Orientation="Horizontal" Spacing="14">
+                    <Border Width="48" Height="48" CornerRadius="12" Background="{DynamicResource InfoSoftBrush}">
+                        <PathIcon Data="{Binding Icon}" Width="24" Height="24" Foreground="{DynamicResource SystemControlHighlightAccentBrush}" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center" Spacing="2">
+                        <TextBlock Classes="h1" Text="{Binding Title}" />
+                        <Border Classes="pill" Background="{DynamicResource WarningSoftBrush}" HorizontalAlignment="Left"><TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}" Text="{loc:Tr 'Coming soon'}" /></Border>
+                    </StackPanel>
+                </StackPanel>
+                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                <ItemsControl ItemsSource="{Binding LocalizedFeatures}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Grid ColumnDefinitions="Auto,*" Margin="0 3"><TextBlock Text="&#8226;" Margin="0 0 10 0" Foreground="{DynamicResource SystemControlHighlightAccentBrush}" /><TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" /></Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8" Padding="12 10">
+                    <StackPanel Spacing="2">
+                        <TextBlock Classes="caption" Text="{loc:Tr 'Waiting for'}" />
+                        <TextBlock Text="{Binding DependsOn}" Classes="mono" FontSize="12" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </ScrollViewer>
+</UserControl>

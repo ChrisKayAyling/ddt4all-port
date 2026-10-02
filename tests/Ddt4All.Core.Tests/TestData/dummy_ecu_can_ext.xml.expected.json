@@ -1,0 +1,15 @@
+{
+"autoidents": [],
+"ecuname": "EXT_CAN_ECU",
+"obd": {
+	"protocol": "CAN",
+	"send_id": "18DAF0F1",
+	"recv_id": "18DBF0F1",
+	"baudrate": 500000,
+	"funcaddr": "1A",
+	"funcname": "Injection"
+},
+"data": {},
+"requests": [],
+"devices": []
+}

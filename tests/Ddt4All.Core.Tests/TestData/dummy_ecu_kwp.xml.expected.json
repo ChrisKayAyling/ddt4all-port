@@ -1,0 +1,15 @@
+{
+"autoidents": [],
+"ecuname": "KWP_ECU",
+"obd": {
+	"protocol": "KWP2000",
+	"fastinit": true,
+	"funcaddr": "26",
+	"funcname": "Engine",
+	"kw1": "81",
+	"kw2": "82"
+},
+"data": {},
+"requests": [],
+"devices": []
+}

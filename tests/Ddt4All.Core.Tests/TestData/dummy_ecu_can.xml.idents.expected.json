@@ -1,0 +1,1 @@
+{"address": "1A", "group": "Injection", "protocol": "CAN", "projects": ["PROJECT_A", "PROJECT_B"], "ecuname": "TEST_ECU", "autoidents": [{"diagnostic_version": "10", "supplier_code": "ABC", "soft_version": "1234", "version": "01"}, {"diagnostic_version": "11", "supplier_code": "XYZ", "soft_version": "5678", "version": "02"}]}

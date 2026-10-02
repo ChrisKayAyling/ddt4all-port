@@ -1,0 +1,156 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+    <UserControl.Styles>
+        <Style Selector="Grid.row"><Setter Property="MinHeight" Value="44" /><Setter Property="Margin" Value="0 6" /></Style>
+        <Style Selector="Rectangle.sep"><Setter Property="Height" Value="1" /><Setter Property="Fill" Value="{DynamicResource BorderSubtleBrush}" /></Style>
+        <Style Selector="ListBox.accents"><Setter Property="Background" Value="Transparent" /><Setter Property="ItemsPanel"><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="6" /></ItemsPanelTemplate></Setter></Style>
+        <Style Selector="ListBox.accents ListBoxItem"><Setter Property="Padding" Value="4" /><Setter Property="CornerRadius" Value="20" /><Setter Property="MinHeight" Value="0" /></Style>
+    </UserControl.Styles>
+    <ScrollViewer>
+        <StackPanel MaxWidth="860" Margin="28 24" Spacing="20" HorizontalAlignment="Left">
+            <StackPanel Spacing="2">
+                <TextBlock Classes="h1" Text="{loc:Tr 'Settings'}" />
+                <TextBlock Classes="muted" Text="{loc:Tr 'Changes are saved automatically.'}" />
+            </StackPanel>
+
+            <!-- appearance -->
+            <Border Classes="card">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="h2" Text="{loc:Tr 'Appearance'}" Margin="0 0 0 6" />
+                    <Grid Classes="row" ColumnDefinitions="*,260">
+                        <StackPanel VerticalAlignment="Center"><TextBlock Text="{loc:Tr 'Language'}" /><TextBlock Classes="caption" Text="{loc:Tr 'Takes effect immediately.'}" /></StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:SettingsViewModel+LanguageChoice"><TextBlock Text="{Binding Display}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,260">
+                        <TextBlock Text="{loc:Tr 'Theme'}" VerticalAlignment="Center" />
+                        <ListBox Grid.Column="1" Classes="segmented" ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}">
+                            <ListBox.ItemTemplate><DataTemplate x:DataType="vm:ChoiceItem"><TextBlock Text="{Binding Title}" /></DataTemplate></ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:Tr 'Accent colour'}" VerticalAlignment="Center" />
+                        <ListBox Grid.Column="1" Classes="accents" ItemsSource="{Binding Accents}" SelectedItem="{Binding SelectedAccent}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="svc:AccentOption">
+                                    <Ellipse Width="22" Height="22" Fill="{Binding Swatch}" ToolTip.Tip="{Binding Name}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- connection defaults -->
+            <Border Classes="card">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="h2" Text="{loc:Tr 'Serial and connection defaults'}" Margin="0 0 0 6" />
+                    <Grid Classes="row" ColumnDefinitions="*,260">
+                        <TextBlock Text="{loc:Tr 'Baud rate'}" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding BaudRates}" SelectedItem="{Binding SerialBaud}" HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:Tr 'Hardware flow control (RTS/CTS)'}" VerticalAlignment="Center" />
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding HardwareFlowControl}" OnContent="" OffContent="" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:Tr 'Auto-detect adapters'}" VerticalAlignment="Center" />
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding AutoDetect}" OnContent="" OffContent="" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,120">
+                        <TextBlock Text="{loc:Tr 'Connection timeout (s)'}" VerticalAlignment="Center" />
+                        <NumericUpDown Grid.Column="1" Value="{Binding ConnectionTimeout}" Minimum="1" Maximum="120" FormatString="0" VerticalContentAlignment="Center" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,120">
+                        <TextBlock Text="{loc:Tr 'Read timeout (s)'}" VerticalAlignment="Center" />
+                        <NumericUpDown Grid.Column="1" Value="{Binding ReadTimeout}" Minimum="1" Maximum="120" FormatString="0" VerticalContentAlignment="Center" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,120">
+                        <TextBlock Text="{loc:Tr 'Refresh rate (ms):'}" VerticalAlignment="Center" />
+                        <NumericUpDown Grid.Column="1" Value="{Binding RefreshRate}" Minimum="1" Maximum="5000" FormatString="0" VerticalContentAlignment="Center" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,120">
+                        <TextBlock Text="{loc:Tr 'Can timeout (ms) [0:AUTO] :'}" VerticalAlignment="Center" />
+                        <NumericUpDown Grid.Column="1" Value="{Binding CanTimeout}" Minimum="0" Maximum="10000" FormatString="0" VerticalContentAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- paths -->
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="h2" Text="{loc:Tr 'Paths'}" />
+                    <StackPanel>
+                        <TextBlock Classes="label" Text="{loc:Tr 'ECU database (ecu.zip)'}" />
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <TextBox Text="{Binding EcuZipPath}" Classes="mono" PlaceholderText="{loc:Tr 'Automatic (user data folder)'}" />
+                            <Button Grid.Column="1" Command="{Binding BrowseEcuZipCommand}" Height="34" Content="{loc:Tr 'Browse...'}" />
+                            <Button Grid.Column="2" Command="{Binding ClearEcuZipCommand}" Height="34" ToolTip.Tip="{loc:Tr 'Clear'}"><PathIcon Data="{x:Static svc:Icons.Close}" Width="12" Height="12" /></Button>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Classes="label" Text="{loc:Tr 'ECU directory (extracted XML/JSON)'}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <TextBox Text="{Binding EcuDirectory}" Classes="mono" PlaceholderText="{loc:Tr 'Automatic (user data folder)'}" />
+                            <Button Grid.Column="1" Command="{Binding BrowseEcuDirCommand}" Height="34" Content="{loc:Tr 'Browse...'}" />
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Classes="label" Text="{loc:Tr 'Graphics directory'}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <TextBox Text="{Binding GraphicsDirectory}" Classes="mono" PlaceholderText="{loc:Tr 'Automatic (user data folder)'}" />
+                            <Button Grid.Column="1" Command="{Binding BrowseGraphicsDirCommand}" Height="34" Content="{loc:Tr 'Browse...'}" />
+                        </Grid>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Margin="0 4 0 0">
+                        <TextBlock Classes="caption" Text="{loc:Tr 'Settings folder'}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Classes="caption mono" Text="{Binding ConfigDir}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Classes="ghost" Command="{Binding OpenFolderCommand}" CommandParameter="{Binding ConfigDir}"><PathIcon Data="{x:Static svc:Icons.Folder}" Width="14" Height="14" /></Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- logging + data -->
+            <Border Classes="card">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="h2" Text="{loc:Tr 'Logging and data'}" Margin="0 0 0 6" />
+                    <Grid Classes="row" ColumnDefinitions="*,260">
+                        <TextBlock Text="{loc:Tr 'Log level'}" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding LogLevels}" SelectedItem="{Binding SelectedLogLevel}" HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,260">
+                        <TextBlock Text="{loc:Tr 'CarList Order'}" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding CarlistSortModes}" SelectedItem="{Binding SelectedCarlistSort}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:ChoiceItem"><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <StackPanel VerticalAlignment="Center"><TextBlock Text="{loc:Tr 'Log folder'}" /><TextBlock Classes="caption mono" Text="{Binding LogDir}" /></StackPanel>
+                        <Button Grid.Column="1" Command="{Binding OpenFolderCommand}" CommandParameter="{Binding LogDir}" Content="{loc:Tr 'Open'}" />
+                    </Grid>
+                    <Rectangle Classes="sep" />
+                    <Grid Classes="row" ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{loc:Tr 'Reset DDT4ALL Settings'}" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Command="{Binding ResetCommand}" Classes="danger" Content="{loc:Tr 'Reset'}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

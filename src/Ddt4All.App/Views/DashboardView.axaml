@@ -1,0 +1,126 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:m="using:Ddt4All.App.Models"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+    <ScrollViewer>
+        <Grid MaxWidth="1100" Margin="32 28" ColumnDefinitions="*,24,360" RowDefinitions="Auto,Auto,*" HorizontalAlignment="Stretch">
+            <StackPanel Grid.ColumnSpan="3" Margin="0 0 0 20" Spacing="2">
+                <TextBlock Classes="h1" Text="{loc:Tr 'Connect'}" />
+                <TextBlock Classes="muted" Text="{loc:Tr 'Choose your OBD adapter and connect to the vehicle.'}" />
+            </StackPanel>
+
+            <!-- connection form -->
+            <Border Grid.Row="1" Grid.Column="0" Classes="card">
+                <StackPanel Spacing="16" IsEnabled="{Binding CanEdit}">
+                    <TextBlock Classes="h2" Text="{loc:Tr 'Adapter'}" />
+
+                    <StackPanel>
+                        <TextBlock Classes="label" Text="{loc:Tr 'Device profile'}" />
+                        <ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate x:DataType="m:DeviceProfile"><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Classes="caption" Text="{Binding ProfileHint}" Margin="0 6 0 0" TextWrapping="Wrap" IsVisible="{Binding ProfileHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Classes="label" Text="{loc:Tr 'Connection type'}" />
+                        <ListBox Classes="segmented" SelectedIndex="{Binding TransportIndex}">
+                            <ListBoxItem><TextBlock Text="{loc:Tr 'USB / Bluetooth (serial)'}" /></ListBoxItem>
+                            <ListBoxItem><TextBlock Text="{loc:Tr 'Wi-Fi / Ethernet (TCP)'}" /></ListBoxItem>
+                        </ListBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding IsSerial}" Spacing="16">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <StackPanel>
+                                <TextBlock Classes="label" Text="{loc:Tr 'Serial port'}" />
+                                <ComboBox ItemsSource="{Binding Ports}" SelectedItem="{Binding SelectedPort}" HorizontalAlignment="Stretch" PlaceholderText="{loc:Tr 'Please select a communication port'}">
+                                    <ComboBox.ItemTemplate><DataTemplate x:DataType="m:SerialPortInfo"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Name}" Classes="mono" /><TextBlock Text="{Binding Description}" Classes="muted" /></StackPanel></DataTemplate></ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <Button Grid.Column="1" Command="{Binding RefreshPortsCommand}" VerticalAlignment="Bottom" Height="34" ToolTip.Tip="{loc:Tr 'Refresh'}">
+                                <Panel><PathIcon Data="{x:Static svc:Icons.Refresh}" Width="16" Height="16" IsVisible="{Binding !IsScanningPorts}" /><PathIcon Data="{x:Static svc:Icons.Refresh}" Width="16" Height="16" Opacity="0.4" IsVisible="{Binding IsScanningPorts}" /></Panel>
+                            </Button>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,16,*">
+                            <StackPanel>
+                                <TextBlock Classes="label" Text="{loc:Tr 'Baud rate'}" />
+                                <ComboBox ItemsSource="{Binding BaudRates}" SelectedItem="{Binding Baud}" HorizontalAlignment="Stretch" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                <ToggleSwitch IsChecked="{Binding HardwareFlowControl}" OnContent="{loc:Tr 'Hardware flow control (RTS/CTS)'}" OffContent="{loc:Tr 'Hardware flow control (RTS/CTS)'}" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <Grid IsVisible="{Binding IsTcp}" ColumnDefinitions="*,16,120">
+                        <StackPanel><TextBlock Classes="label" Text="{loc:Tr 'Host / IP address'}" /><TextBox Text="{Binding Host}" Classes="mono" /></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Classes="label" Text="{loc:Tr 'Port'}" /><TextBox Text="{Binding TcpPort}" Classes="mono" /></StackPanel>
+                    </Grid>
+
+                    <ToggleSwitch IsChecked="{Binding Simulation}" OnContent="{loc:Tr 'Simulation mode (no hardware)'}" OffContent="{loc:Tr 'Simulation mode (no hardware)'}" />
+                </StackPanel>
+            </Border>
+
+            <!-- status + actions -->
+            <StackPanel Grid.Row="1" Grid.Column="2" Spacing="16">
+                <Border Classes="card">
+                    <StackPanel Spacing="14">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Panel Width="40" Height="40" VerticalAlignment="Top">
+                                <Border CornerRadius="20" Background="{DynamicResource SurfaceHoverBrush}" IsVisible="{Binding IsDisconnected}" />
+                                <Border CornerRadius="20" Background="{DynamicResource SuccessSoftBrush}" IsVisible="{Binding IsConnected}" />
+                                <Border CornerRadius="20" Background="{DynamicResource WarningSoftBrush}" IsVisible="{Binding IsConnecting}" />
+                                <PathIcon Data="{x:Static svc:Icons.Plug}" Width="20" Height="20" Foreground="{DynamicResource TextMutedBrush}" IsVisible="{Binding IsDisconnected}" />
+                                <PathIcon Data="{x:Static svc:Icons.CheckCircle}" Width="20" Height="20" Foreground="{DynamicResource SuccessBrush}" IsVisible="{Binding IsConnected}" />
+                                <PathIcon Data="{x:Static svc:Icons.Refresh}" Width="20" Height="20" Foreground="{DynamicResource WarningBrush}" IsVisible="{Binding IsConnecting}" />
+                            </Panel>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Classes="h2" FontSize="16" Text="{Binding StateText}" TextWrapping="Wrap" />
+                                <TextBlock Classes="caption" Text="{Binding Adapter.Endpoint}" IsVisible="{Binding IsConnected}" />
+                            </StackPanel>
+                        </Grid>
+                        <Grid IsVisible="{Binding IsConnected}" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="16">
+                            <TextBlock Classes="caption" Text="{loc:Tr 'Adapter'}" />
+                            <TextBlock Grid.Column="1" Text="{Binding Adapter.Name}" />
+                            <TextBlock Grid.Row="1" Classes="caption" Text="{loc:Tr 'Firmware'}" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Adapter.Firmware}" Classes="mono" />
+                            <TextBlock Grid.Row="2" Classes="caption" Text="{loc:Tr 'Battery'}" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Adapter.Voltage, StringFormat={}{0:0.0} V}" Classes="mono" />
+                        </Grid>
+                        <Button Command="{Binding ConnectCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Height="38" Classes="accent" Content="{Binding ConnectButtonText}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="h2" Text="{loc:Tr 'Quick actions'}" Margin="0 0 0 6" />
+                        <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{Binding OpenBrowserCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="10"><PathIcon Data="{x:Static svc:Icons.Ecu}" Width="16" Height="16" /><TextBlock Text="{loc:Tr 'Browse ECUs'}" /></StackPanel>
+                        </Button>
+                        <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{Binding OpenDtcsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="10"><PathIcon Data="{x:Static svc:Icons.Warning}" Width="16" Height="16" /><TextBlock Text="{loc:Tr 'Read DTC'}" /></StackPanel>
+                        </Button>
+                        <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{Binding OpenTerminalCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="10"><PathIcon Data="{x:Static svc:Icons.Terminal}" Width="16" Height="16" /><TextBlock Text="{loc:Tr 'Manual request'}" /></StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card" Background="{DynamicResource WarningSoftBrush}" BorderBrush="{DynamicResource WarningBrush}">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{x:Static svc:Icons.Warning}" Width="16" Height="16" Foreground="{DynamicResource WarningBrush}" />
+                            <TextBlock Classes="h2" Text="{loc:Tr 'Before you connect'}" />
+                        </StackPanel>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Text="{loc:Tr 'Plug the adapter into the OBD port, switch the ignition on and keep expert mode off unless you know exactly what you are doing.'}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

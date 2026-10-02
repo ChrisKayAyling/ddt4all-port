@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.SnifferView"
+             x:DataType="vm:SnifferViewModel">
+    <Grid RowDefinitions="Auto,*" Margin="28 24 28 20" RowSpacing="16">
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="muted" Text="{Binding Summary}" VerticalAlignment="Center" Margin="0 0 8 0" />
+                <Button Command="{Binding ClearCommand}" Content="{loc:Tr 'Clear'}" />
+                <Button Command="{Binding ToggleCommand}" Classes="accent" Classes.danger="{Binding IsRunning}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{x:Static svc:Icons.Play}" Width="14" Height="14" IsVisible="{Binding !IsRunning}" />
+                        <PathIcon Data="{x:Static svc:Icons.Stop}" Width="14" Height="14" IsVisible="{Binding IsRunning}" />
+                        <TextBlock Text="{loc:Tr 'Start'}" IsVisible="{Binding !IsRunning}" />
+                        <TextBlock Text="{loc:Tr 'Stop'}" IsVisible="{Binding IsRunning}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <StackPanel Spacing="2">
+                <TextBlock Classes="h1" Text="{loc:Tr 'CAN Sniffer'}" />
+                <TextBlock Classes="muted" Text="{loc:Tr 'Live bus traffic grouped by CAN id.'}" />
+            </StackPanel>
+        </DockPanel>
+        <Border Grid.Row="1" Classes="card" Padding="0" ClipToBounds="True">
+            <Grid RowDefinitions="Auto,*">
+                <Grid Height="36" ColumnDefinitions="90,60,*,100,110" Background="{DynamicResource SurfaceAltBrush}">
+                    <TextBlock Classes="caption" Text="ID" Margin="16 0 0 0" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Classes="caption" Text="DLC" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="2" Classes="caption" Text="{loc:Tr 'Data'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="3" Classes="caption" Text="{loc:Tr 'Count'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="4" Classes="caption" Text="{loc:Tr 'Period'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                </Grid>
+                <ListBox Grid.Row="1" Classes="rows" ItemsSource="{Binding Rows}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SnifferRow">
+                            <Grid Height="30" ColumnDefinitions="90,60,*,100,110">
+                                <TextBlock Text="{Binding IdText}" Classes="mono" FontWeight="SemiBold" Margin="16 0 0 0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding Dlc}" Classes="muted mono" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="{Binding Data}" Classes="mono" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="3" Text="{Binding Count}" Classes="muted mono" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="4" Text="{Binding Period}" Classes="muted mono" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

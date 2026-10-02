@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key><string>DDT4All</string>
+  <key>CFBundleDisplayName</key><string>DDT4All</string>
+  <key>CFBundleIdentifier</key><string>io.github.ddt4all.net</string>
+  <key>CFBundleVersion</key><string>@VERSION@</string>
+  <key>CFBundleShortVersionString</key><string>@VERSION@</string>
+  <key>CFBundleExecutable</key><string>Ddt4All.App</string>
+  <key>CFBundleIconFile</key><string>ddt4all</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>LSMinimumSystemVersion</key><string>11.0</string>
+  <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
+  <key>NSHighResolutionCapable</key><true/>
+  <key>NSSupportsAutomaticGraphicsSwitching</key><true/>
+  <key>NSHumanReadableCopyright</key><string>DDT4All.NET contributors</string>
+  <key>NSBluetoothAlwaysUsageDescription</key><string>DDT4All talks to Bluetooth OBD adapters.</string>
+  <key>NSLocalNetworkUsageDescription</key><string>DDT4All talks to Wi-Fi OBD adapters on the local network.</string>
+</dict>
+</plist>

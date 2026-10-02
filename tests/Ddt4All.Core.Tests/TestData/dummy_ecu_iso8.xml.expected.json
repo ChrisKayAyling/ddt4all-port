@@ -1,0 +1,14 @@
+{
+"autoidents": [],
+"ecuname": "ISO8_ECU",
+"obd": {
+	"protocol": "ISO8",
+	"funcaddr": "27",
+	"funcname": "Body",
+	"kw1": "91",
+	"kw2": "92"
+},
+"data": {},
+"requests": [],
+"devices": []
+}

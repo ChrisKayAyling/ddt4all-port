@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ecu>
+    <Target Name="RICH_ECU">
+        <AutoIdents>
+            <AutoIdent DiagVersion="10" Supplier="CONTI" Soft="1234" Version="0001" />
+            <AutoIdent DiagVersion="11" Supplier="CONTI" Soft="1234" Version="0005" />
+            <AutoIdent DiagVersion="0A" Supplier="BOSCH" Soft="9999" Version="A001" />
+        </AutoIdents>
+        <Projects>
+            <X95/>
+            <X85/>
+        </Projects>
+        <Function Address="26" Name="Injection" />
+        <CAN BaudRate="500000">
+            <SendId><CANId Value="1792" /></SendId>
+            <ReceiveId><CANId Value="2024" /></ReceiveId>
+        </CAN>
+        <Categories>
+            <Category Name="Measures">
+                <Screen Name="Live data" Width="800" Height="600" Color="16777215">
+                    <Send Delay="100" RequestName="StartSession" />
+                    <Label Text="Coolant" Color="255" Alignment="1">
+                        <Rectangle Left="10" Top="20.7" Height="30" Width="120" />
+                        <Font Name="Arial" Size="8,5" Bold="1" Italic="0" Color="16711680" />
+                    </Label>
+                    <Display DataName="Coolant" RequestName="ReadData" Color="8421504" Width="80">
+                        <Rectangle Left="140" Top="20" Height="30" Width="200" />
+                        <Font Name="Tahoma" Size="9" Bold="0" Italic="1" />
+                    </Display>
+                    <Input DataName="Mode" RequestName="WriteConfig" Width="90">
+                        <Rectangle Left="140" Top="60" Height="30" Width="200" />
+                        <Font Name="Tahoma" Size="9" Bold="0" Italic="0" Color="255" />
+                    </Input>
+                    <Button Text="Reset">
+                        <Rectangle Left="10" Top="100" Height="40" Width="100" />
+                        <Font Name="Arial" Size="10" Bold="1" Italic="0" />
+                        <Message Text="Really reset?" />
+                        <Message Text="Engine must be off" />
+                        <Send Delay="0" RequestName="Reset" />
+                        <Send Delay="250" RequestName="ReadData" />
+                    </Button>
+                    <Button Text="Reset">
+                        <Rectangle Left="120" Top="100" Height="40" Width="100" />
+                        <Font Name="Arial" Size="10" Bold="0" Italic="0" />
+                    </Button>
+                </Screen>
+                <Screen Name="Empty" Width="640" Height="480" Color="0" />
+            </Category>
+            <Category Name="Other">
+                <Screen Name="Second" Width="100" Height="100" Color="65280" />
+            </Category>
+        </Categories>
+    </Target>
+
+    <Device Name="DTC1" DTC="4660" Type="2">
+        <DeviceData Name="Coolant" FailureFlag="FF" />
+        <DeviceData Name="Rpm" FailureFlag="01" />
+    </Device>
+
+    <Requests Endian="Big">
+        <Request Name="StartSession">
+            <Sent><SentBytes>1003</SentBytes></Sent>
+            <Received MinBytes="2" />
+            <ReplyBytes>5003</ReplyBytes>
+        </Request>
+        <Request Name="ReadData">
+            <DenyAccess><NoSDS /><Plant /></DenyAccess>
+            <Sent><SentBytes>2101</SentBytes></Sent>
+            <Received MinBytes="30">
+                <DataItem Name="Coolant" FirstByte="2" BitOffset="0" />
+                <DataItem Name="Rpm" FirstByte="3" BitOffset="0" />
+                <DataItem Name="Gear" FirstByte="5" BitOffset="0" />
+                <DataItem Name="FlagBits" FirstByte="6" BitOffset="3" />
+                <DataItem Name="Temp16" FirstByte="7" BitOffset="0" />
+                <DataItem Name="VIN" FirstByte="9" BitOffset="0" />
+                <DataItem Name="LeVal" FirstByte="2" BitOffset="0" Endian="Little" />
+            </Received>
+            <ReplyBytes>6101A0123401053C80FF56463132333435363738393031323334353637</ReplyBytes>
+        </Request>
+        <Request Name="WriteConfig">
+            <ManuelSend />
+            <ShiftBytesCount>2</ShiftBytesCount>
+            <Sent>
+                <SentBytes>2E0100000000</SentBytes>
+                <DataItem Name="Mode" FirstByte="3" BitOffset="0" />
+                <DataItem Name="Offset" FirstByte="4" BitOffset="0" />
+                <DataItem Name="Bits" FirstByte="6" BitOffset="2" />
+            </Sent>
+            <Received MinBytes="3" />
+        </Request>
+        <Request Name="Reset">
+            <Sent><SentBytes>3101FF00</SentBytes></Sent>
+            <Received MinBytes="4" />
+        </Request>
+    </Requests>
+
+    <Data Name="Coolant">
+        <Description><![CDATA[Coolant temperature]]></Description>
+        <Comment><![CDATA[<b>deg</b> C]]></Comment>
+        <Bits count="8">
+            <Scaled Step="1" Offset="-40" DivideBy="1" Format="0" Unit="C" />
+        </Bits>
+    </Data>
+    <Data Name="Rpm">
+        <Bits count="16">
+            <Scaled Step="0.25" Offset="0" DivideBy="1" Format="0.00" Unit="rpm" />
+        </Bits>
+    </Data>
+    <Data Name="Gear">
+        <List>
+            <Item Value="0" Text="Neutral" />
+            <Item Value="1" Text="First" />
+            <Item Value="255" Text="Reverse" />
+        </List>
+        <Bits count="8" />
+    </Data>
+    <Data Name="FlagBits">
+        <Bits count="2"><Binary /></Bits>
+    </Data>
+    <Data Name="Temp16">
+        <Bits count="16" signed="1">
+            <Scaled Step="1" Offset="0" DivideBy="10" Format="0.0" Unit="C" />
+        </Bits>
+    </Data>
+    <Data Name="VIN">
+        <Bytes count="17" ascii="1" />
+    </Data>
+    <Data Name="LeVal">
+        <Bits count="16" />
+    </Data>
+    <Data Name="Mode">
+        <List>
+            <Item Value="1" Text="ON" />
+            <Item Value="2" Text="OFF" />
+        </List>
+        <Bits count="8" />
+    </Data>
+    <Data Name="Offset">
+        <Bits count="8" signed="1">
+            <Scaled Step="2" Offset="10" DivideBy="4" Format="" />
+        </Bits>
+    </Data>
+    <Data Name="Bits">
+        <Bits count="3" />
+    </Data>
+</Ecu>

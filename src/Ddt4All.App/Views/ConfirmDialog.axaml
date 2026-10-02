@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Ddt4All.App.ViewModels"
+        xmlns:svc="using:Ddt4All.App.Services"
+        x:Class="Ddt4All.App.Views.ConfirmDialog"
+        x:DataType="vm:ConfirmDialogViewModel"
+        Title="{Binding Title}" Width="520" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="{DynamicResource AppBgBrush}">
+    <StackPanel Margin="24" Spacing="16">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <Border Width="40" Height="40" CornerRadius="20" Background="{DynamicResource DangerSoftBrush}" IsVisible="{Binding IsDanger}">
+                <PathIcon Data="{x:Static svc:Icons.Warning}" Width="20" Height="20" Foreground="{DynamicResource DangerBrush}" />
+            </Border>
+            <TextBlock Text="{Binding Title}" Classes="h1" FontSize="19" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="400" />
+        </StackPanel>
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+        <Border Classes="card" Background="{DynamicResource DangerSoftBrush}" BorderBrush="{DynamicResource DangerBrush}" IsVisible="{Binding HasBullets}" Padding="14 12">
+            <ItemsControl ItemsSource="{Binding Bullets}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Grid ColumnDefinitions="Auto,*" Margin="0 3">
+                            <TextBlock Text="&#8226;" Margin="0 0 8 0" Foreground="{DynamicResource DangerBrush}" FontWeight="Bold" />
+                            <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+        <CheckBox IsVisible="{Binding RequireAcknowledgement}" IsChecked="{Binding Acknowledged}" Content="{Binding AcknowledgementText}" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="{Binding CancelText}" Click="OnCancel" MinWidth="90" />
+            <Button Name="ConfirmButton" Content="{Binding ConfirmText}" Click="OnConfirm" IsEnabled="{Binding CanConfirm}" Classes="accent" Classes.danger="{Binding IsDanger}" MinWidth="120" />
+        </StackPanel>
+    </StackPanel>
+</Window>

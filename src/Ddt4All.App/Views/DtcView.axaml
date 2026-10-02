@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:m="using:Ddt4All.App.Models"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.DtcView"
+             x:DataType="vm:DtcViewModel">
+    <Grid RowDefinitions="Auto,*" Margin="28 24 28 20" RowSpacing="16">
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Button Command="{Binding ClearCommand}" Classes="danger" IsEnabled="{Binding CanClear}" ToolTip.Tip="{loc:Tr 'Expert mode required'}">
+                    <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Delete}" Width="14" Height="14" /><TextBlock Text="{loc:Tr 'Clear DTCs'}" /></StackPanel>
+                </Button>
+                <Button Command="{Binding ReadCommand}" Classes="accent">
+                    <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Refresh}" Width="14" Height="14" /><TextBlock Text="{loc:Tr 'Read DTC'}" /></StackPanel>
+                </Button>
+            </StackPanel>
+            <StackPanel Spacing="2">
+                <TextBlock Classes="h1" Text="{loc:Tr 'DTCs'}" />
+                <TextBlock Classes="muted" Text="{Binding Subtitle}" />
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="1" Classes="card" Padding="0" ClipToBounds="True">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <Grid Height="36" ColumnDefinitions="110,*,200" Background="{DynamicResource SurfaceAltBrush}">
+                    <TextBlock Classes="caption" Text="{loc:Tr 'Code'}" VerticalAlignment="Center" Margin="16 0 0 0" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Classes="caption" Text="{loc:Tr 'Description'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="2" Classes="caption" Text="{loc:Tr 'Status'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                </Grid>
+                <ProgressBar Grid.Row="1" Height="2" IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+                <ListBox Grid.Row="2" Classes="rows" ItemsSource="{Binding Items}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="m:DtcItem">
+                            <Grid Height="44" ColumnDefinitions="110,*,200">
+                                <TextBlock Text="{Binding Code}" Classes="mono" FontWeight="SemiBold" VerticalAlignment="Center" Margin="16 0 0 0" />
+                                <TextBlock Grid.Column="1" Text="{Binding Description}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <Border Grid.Column="2" Classes="pill statuspill" Classes.active="{Binding IsActive}" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Status}" FontSize="11" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6" IsHitTestVisible="False" IsVisible="{Binding ShowHint}">
+                    <PathIcon Data="{x:Static svc:Icons.Warning}" Width="28" Height="28" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Classes="muted" Text="{loc:Tr 'Connect to a vehicle and press Read DTC.'}" />
+                </StackPanel>
+                <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6" IsVisible="{Binding IsEmpty}" IsHitTestVisible="False">
+                    <PathIcon Data="{x:Static svc:Icons.CheckCircle}" Width="32" Height="32" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Classes="muted" Text="{loc:Tr 'No fault codes stored.'}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

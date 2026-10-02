@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:v="using:Ddt4All.App.Views"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.LogView"
+             x:DataType="vm:LogViewModel">
+    <UserControl.Styles>
+        <Style Selector="TextBlock.ll"><Setter Property="FontFamily" Value="{DynamicResource MonoFont}" /><Setter Property="FontSize" Value="12" /></Style>
+        <Style Selector="TextBlock.ll.warn"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}" /></Style>
+        <Style Selector="TextBlock.ll.err"><Setter Property="Foreground" Value="{DynamicResource DangerBrush}" /></Style>
+        <Style Selector="TextBlock.ll.dim"><Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" /></Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="Auto,Auto,*" Margin="28 24 28 20" RowSpacing="14">
+        <StackPanel Spacing="2">
+            <TextBlock Classes="h1" Text="{loc:Tr 'Logs'}" />
+            <TextBlock Classes="muted" Text="{loc:Tr 'Application log (also written to disk).'}" />
+        </StackPanel>
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+            <TextBox Text="{Binding Filter}" PlaceholderText="{loc:Tr 'Filter...'}">
+                <TextBox.InnerLeftContent><PathIcon Data="{x:Static svc:Icons.Search}" Width="14" Height="14" Margin="10 0 0 0" Foreground="{DynamicResource TextMutedBrush}" /></TextBox.InnerLeftContent>
+            </TextBox>
+            <ComboBox Grid.Column="1" Width="140" ItemsSource="{Binding Levels}" SelectedItem="{Binding MinLevel}" />
+            <ToggleButton Grid.Column="2" IsChecked="{Binding AutoScroll}" Content="{loc:Tr 'Follow'}" Height="34" />
+            <Button Grid.Column="3" Command="{Binding ClearCommand}" Height="34" ToolTip.Tip="{loc:Tr 'Clear'}"><PathIcon Data="{x:Static svc:Icons.Delete}" Width="14" Height="14" /></Button>
+            <Button Grid.Column="4" Click="OnCopy" Height="34" ToolTip.Tip="{loc:Tr 'Copy'}"><PathIcon Data="{x:Static svc:Icons.Copy}" Width="14" Height="14" /></Button>
+            <Button Grid.Column="5" Click="OnOpenFolder" Height="34" ToolTip.Tip="{loc:Tr 'Open log folder'}"><PathIcon Data="{x:Static svc:Icons.Folder}" Width="14" Height="14" /></Button>
+        </Grid>
+        <Border Grid.Row="2" Classes="card" Padding="0" ClipToBounds="True">
+            <Grid RowDefinitions="*,Auto">
+                <ListBox x:Name="List" Classes="rows" ItemsSource="{Binding Entries}" Background="Transparent" BorderThickness="0" SelectionMode="Multiple">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="svc:LogEntry">
+                            <Grid ColumnDefinitions="96,40,130,*" Margin="14 3" ColumnSpacing="8">
+                                <TextBlock Classes="ll dim" Text="{Binding TimeText}" />
+                                <TextBlock Grid.Column="1" Classes="ll" Classes.warn="{Binding IsWarn}" Classes.err="{Binding IsErr}" Classes.dim="{Binding IsDim}" Text="{Binding LevelText}" FontWeight="Bold" />
+                                <TextBlock Grid.Column="2" Classes="ll dim" Text="{Binding ShortCategory}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="3" Classes="ll" Classes.warn="{Binding IsWarn}" Classes.err="{Binding IsErr}" Text="{Binding Text}" TextWrapping="Wrap" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Border Grid.Row="1" Background="{DynamicResource SurfaceAltBrush}" Padding="14 6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 1 0 0">
+                    <TextBlock Classes="caption" Text="{Binding Summary}" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

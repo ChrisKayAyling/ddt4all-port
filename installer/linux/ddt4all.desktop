@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=DDT4All
+GenericName=ECU Diagnostic Tool
+Comment=Vehicle ECU diagnostics and parameter editing
+Exec=ddt4all
+Icon=ddt4all
+Terminal=false
+Categories=Utility;
+Keywords=ECU;OBD;diagnostic;ELM327;CAN;
+StartupWMClass=Ddt4All.App

@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.AboutView"
+             x:DataType="vm:AboutViewModel">
+    <ScrollViewer>
+        <StackPanel MaxWidth="860" Margin="28 24" Spacing="20" HorizontalAlignment="Left">
+            <Border Classes="card" Padding="28">
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <Border Width="72" Height="72" CornerRadius="18" Background="{DynamicResource SystemControlHighlightAccentBrush}" VerticalAlignment="Top">
+                        <PathIcon Data="{x:Static svc:Icons.Ecu}" Width="40" Height="40" Foreground="White" />
+                    </Border>
+                    <StackPanel Spacing="6" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="{Binding AppName}" Classes="h1" FontSize="28" />
+                            <Border Classes="pill" Background="{DynamicResource InfoSoftBrush}" VerticalAlignment="Center"><TextBlock Text="{Binding Version}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SystemControlHighlightAccentBrush}" /></Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Tagline}" TextWrapping="Wrap" />
+                        <TextBlock Classes="caption" Text="{Binding PortNote}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" Background="{DynamicResource WarningSoftBrush}" BorderBrush="{DynamicResource WarningBrush}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <PathIcon Data="{x:Static svc:Icons.Warning}" Width="20" Height="20" Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Top" />
+                    <StackPanel Spacing="4" MaxWidth="700">
+                        <TextBlock Classes="h2" Text="{loc:Tr 'Warnings'}" />
+                        <TextBlock TextWrapping="Wrap" Text="{loc:Tr 'Do not use this software if you do not understand how a CAN network (or an ECU) works.'}" />
+                        <TextBlock TextWrapping="Wrap" Text="{Binding Disclaimer}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="24">
+                    <TextBlock Classes="caption" Text="{loc:Tr 'License'}" /><TextBlock Grid.Column="1" Text="{Binding License}" />
+                    <TextBlock Grid.Row="1" Classes="caption" Text="{loc:Tr 'Runtime'}" /><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Runtime}" Classes="mono" FontSize="12" />
+                    <TextBlock Grid.Row="2" Classes="caption" Text="OS" /><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Os}" Classes="mono" FontSize="12" TextWrapping="Wrap" />
+                    <TextBlock Grid.Row="3" Classes="caption" Text="{loc:Tr 'Settings folder'}" /><TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ConfigDir}" Classes="mono" FontSize="12" TextWrapping="Wrap" />
+                    <TextBlock Grid.Row="4" Classes="caption" Text="{loc:Tr 'Log folder'}" /><TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding LogDir}" Classes="mono" FontSize="12" TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="h2" Text="{loc:Tr 'Created by:'}" />
+                    <TextBlock Text="Cedric PAILLE - DDT4ALL 2016-2026" Classes="muted" />
+                    <ItemsControl ItemsSource="{Binding Contributors}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:Contributor">
+                                <Border Classes="pill" Background="{DynamicResource SurfaceHoverBrush}" Margin="0 0 6 6" Padding="10 4">
+                                    <StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Text="{Binding Name}" FontWeight="Medium" /><TextBlock Text="{Binding Role}" Classes="caption" /></StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

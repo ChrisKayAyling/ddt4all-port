@@ -1,0 +1,176 @@
+{
+"autoidents": [
+	{
+	"diagversion": "10",
+	"supplier": "CONTI",
+	"soft": "1234",
+	"version": "0001"
+	},
+	{
+	"diagversion": "11",
+	"supplier": "CONTI",
+	"soft": "1234",
+	"version": "0005"
+	},
+	{
+	"diagversion": "0A",
+	"supplier": "BOSCH",
+	"soft": "9999",
+	"version": "A001"
+	}
+],
+"ecuname": "RICH_ECU",
+"obd": {
+	"protocol": "CAN",
+	"send_id": "700",
+	"recv_id": "7E8",
+	"baudrate": 500000,
+	"funcaddr": "1A",
+	"funcname": "Injection"
+},
+"data": {
+	"Coolant": {
+	"scaled": true,
+	"offset": -40.0,
+	"format": "0",
+	"unit": "C",
+	"comment": "deg C"
+	},
+	"Rpm": {
+	"bitscount": 16,
+	"scaled": true,
+	"bytescount": 2,
+	"step": 0.25,
+	"format": "0.00",
+	"unit": "rpm"
+	},
+	"Gear": {
+	"lists": {
+		"0": "Neutral",
+		"1": "First",
+		"255": "Reverse"
+	}
+	},
+	"FlagBits": {
+	"bitscount": 2,
+	"binary": true
+	},
+	"Temp16": {
+	"bitscount": 16,
+	"scaled": true,
+	"signed": true,
+	"bytescount": 2,
+	"divideby": 10.0,
+	"format": "0.0",
+	"unit": "C"
+	},
+	"VIN": {
+	"bitscount": 136,
+	"byte": true,
+	"bytescount": 17,
+	"bytesascii": true
+	},
+	"LeVal": {
+	"bitscount": 16,
+	"bytescount": 2
+	},
+	"Mode": {
+	"lists": {
+		"1": "ON",
+		"2": "OFF"
+	}
+	},
+	"Offset": {
+	"scaled": true,
+	"signed": true,
+	"step": 2.0,
+	"offset": 10.0,
+	"divideby": 4.0
+	},
+	"Bits": {
+	"bitscount": 3
+	}
+},
+"requests": [
+	{
+	"minbytes": 2,
+	"replybytes": "5003",
+	"sentbytes": "1003",
+	"name": "StartSession",
+	"deny_sds": []
+	},
+	{
+	"minbytes": 30,
+	"replybytes": "6101A0123401053C80FF56463132333435363738393031323334353637",
+	"sentbytes": "2101",
+	"name": "ReadData",
+	"deny_sds": [
+		"nosds",
+		"plant"
+	],
+	"receivebyte_dataitems": {
+		"Coolant": {
+		"firstbyte": 2
+		},
+		"Rpm": {
+		"firstbyte": 3
+		},
+		"Gear": {
+		"firstbyte": 5
+		},
+		"FlagBits": {
+		"firstbyte": 6,
+		"bitoffset": 3
+		},
+		"Temp16": {
+		"firstbyte": 7
+		},
+		"VIN": {
+		"firstbyte": 9
+		},
+		"LeVal": {
+		"firstbyte": 2,
+		"endian": "Little"
+		}
+	}
+	},
+	{
+	"minbytes": 3,
+	"shiftbytescount": 2,
+	"manualsend": true,
+	"sentbytes": "2E0100000000",
+	"name": "WriteConfig",
+	"deny_sds": [],
+	"sendbyte_dataitems": {
+		"Mode": {
+		"firstbyte": 3
+		},
+		"Offset": {
+		"firstbyte": 4
+		},
+		"Bits": {
+		"firstbyte": 6,
+		"bitoffset": 2
+		}
+	}
+	},
+	{
+	"minbytes": 4,
+	"sentbytes": "3101FF00",
+	"name": "Reset",
+	"deny_sds": []
+	}
+],
+"devices": [
+	{
+	"dtc": 4660,
+	"dtctype": 2,
+	"devicedata": {
+		"Coolant": "FF",
+		"Rpm": "01"
+	},
+	"name": "DTC1"
+	}
+],
+"endian": "Big"
+}

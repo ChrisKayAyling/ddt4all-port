@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+if [ "$1" = configure ]; then
+  command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database -q /usr/share/applications || true
+  command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+  cat <<'MSG'
+
+DDT4All installed. To use USB/serial OBD adapters (ELM327 etc.) your user must be
+allowed to open serial devices. On most distributions:
+
+    sudo usermod -aG dialout "$USER"      # Debian/Ubuntu/Mint/Raspberry Pi OS
+    (Arch/Fedora: group "uucp" or "dialout" - check: ls -l /dev/ttyUSB0)
+
+then log out and back in. Bluetooth/ELM adapters via rfcomm need the same group.
+
+MSG
+fi
+exit 0

@@ -1,0 +1,155 @@
+{
+ "screens": {
+  "Live data": {
+   "width": 800,
+   "height": 600,
+   "color": "rgb(255,255,255)",
+   "labels": [
+    {
+     "text": "Coolant",
+     "color": "rgb(255,0,0)",
+     "alignment": "1",
+     "fontcolor": "rgb(0,0,255)",
+     "bbox": {
+      "left": 10,
+      "top": 20,
+      "height": 30,
+      "width": 120
+     },
+     "font": {
+      "name": "Arial",
+      "size": 8.5,
+      "bold": "1",
+      "italic": "0"
+     }
+    }
+   ],
+   "presend": [
+    {
+     "Delay": "100",
+     "RequestName": "StartSession"
+    }
+   ],
+   "displays": [
+    {
+     "text": "Coolant",
+     "request": "ReadData",
+     "color": "rgb(128,128,128)",
+     "width": 80,
+     "rect": {
+      "left": 140,
+      "top": 20,
+      "height": 30,
+      "width": 200
+     },
+     "font": {
+      "name": "Tahoma",
+      "size": 9.0,
+      "bold": "0",
+      "italic": "1"
+     },
+     "fontcolor": "rgb(170,170,170)"
+    }
+   ],
+   "buttons": [
+    {
+     "text": "Reset",
+     "uniquename": "Reset_0",
+     "rect": {
+      "left": 10,
+      "top": 100,
+      "height": 40,
+      "width": 100
+     },
+     "font": {
+      "name": "Arial",
+      "size": 10.0,
+      "bold": "1",
+      "italic": "0"
+     },
+     "messages": [
+      "Really reset?",
+      "Engine must be off"
+     ],
+     "send": [
+      {
+       "Delay": "0",
+       "RequestName": "Reset"
+      },
+      {
+       "Delay": "250",
+       "RequestName": "ReadData"
+      }
+     ]
+    },
+    {
+     "text": "Reset",
+     "uniquename": "Reset_1",
+     "rect": {
+      "left": 120,
+      "top": 100,
+      "height": 40,
+      "width": 100
+     },
+     "font": {
+      "name": "Arial",
+      "size": 10.0,
+      "bold": "0",
+      "italic": "0"
+     },
+     "messages": []
+    }
+   ],
+   "inputs": [
+    {
+     "text": "Mode",
+     "request": "WriteConfig",
+     "color": "rgb(170,170,170)",
+     "fontcolor": "rgb(255,0,0)",
+     "width": 90,
+     "rect": {
+      "left": 140,
+      "top": 60,
+      "height": 30,
+      "width": 200
+     },
+     "font": {
+      "name": "Tahoma",
+      "size": 9.0,
+      "bold": "0",
+      "italic": "0"
+     }
+    }
+   ]
+  },
+  "Empty": {
+   "width": 640,
+   "height": 480,
+   "color": "rgb(0,0,0)",
+   "labels": [],
+   "presend": [],
+   "displays": [],
+   "buttons": [],
+   "inputs": []
+  },
+  "Second": {
+   "width": 100,
+   "height": 100,
+   "color": "rgb(0,255,0)",
+   "labels": [],
+   "presend": [],
+   "displays": [],
+   "buttons": [],
+   "inputs": []
+  }
+ },
+ "categories": {
+  "Measures": [
+   "Live data",
+   "Empty"
+  ],
+  "Other": [
+   "Second"
+  ]
+ }
+}

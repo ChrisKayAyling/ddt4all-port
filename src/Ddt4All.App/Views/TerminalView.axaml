@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:v="using:Ddt4All.App.Views"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.TerminalView"
+             x:DataType="vm:TerminalViewModel">
+    <UserControl.Styles>
+        <Style Selector="TextBlock.tl"><Setter Property="FontFamily" Value="{DynamicResource MonoFont}" /><Setter Property="FontSize" Value="13" /><Setter Property="Foreground" Value="#8B96A8" /></Style>
+        <Style Selector="TextBlock.tl.req"><Setter Property="Foreground" Value="#8CC2FF" /></Style>
+        <Style Selector="TextBlock.tl.resp"><Setter Property="Foreground" Value="#7EE2A8" /></Style>
+        <Style Selector="TextBlock.tl.err"><Setter Property="Foreground" Value="#FF8A8A" /></Style>
+        <Style Selector="ListBox.term ListBoxItem"><Setter Property="Padding" Value="0" /><Setter Property="MinHeight" Value="0" /><Setter Property="CornerRadius" Value="0" /></Style>
+        <Style Selector="Button.chip"><Setter Property="Padding" Value="10 3" /><Setter Property="MinHeight" Value="0" /><Setter Property="CornerRadius" Value="12" /><Setter Property="FontSize" Value="12" /><Setter Property="FontFamily" Value="{DynamicResource MonoFont}" /></Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="Auto,*,Auto" Margin="28 24 28 20" RowSpacing="14">
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Border Classes="pill" Background="{DynamicResource DangerSoftBrush}" IsVisible="{Binding IsExpert}"><TextBlock Text="{loc:Tr 'Expert mode: all requests allowed'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}" /></Border>
+                <Border Classes="pill" Background="{DynamicResource SurfaceHoverBrush}" IsVisible="{Binding !IsExpert}"><TextBlock Text="{loc:Tr 'Safe mode: read-only requests'}" FontSize="11" Classes="muted" /></Border>
+                <Button Classes="ghost" Command="{Binding ClearCommand}" ToolTip.Tip="{loc:Tr 'Clear'}"><PathIcon Data="{x:Static svc:Icons.Delete}" Width="16" Height="16" /></Button>
+                <Button Classes="ghost" Click="OnCopy" ToolTip.Tip="{loc:Tr 'Copy'}"><PathIcon Data="{x:Static svc:Icons.Copy}" Width="16" Height="16" /></Button>
+            </StackPanel>
+            <StackPanel Spacing="2">
+                <TextBlock Classes="h1" Text="{loc:Tr 'Terminal'}" />
+                <TextBlock Classes="muted" Text="{loc:Tr 'Send AT commands or raw hex requests to the connected adapter.'}" />
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="1" CornerRadius="10" Background="{DynamicResource TerminalBgBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" ClipToBounds="True">
+            <ListBox x:Name="Log" Classes="term" ItemsSource="{Binding Lines}" Background="Transparent" SelectionMode="Multiple" Padding="8">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:TerminalLine">
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="6 2" ColumnSpacing="10">
+                            <TextBlock Classes="tl" Text="{Binding TimeText}" Opacity="0.55" IsVisible="{Binding $parent[v:TerminalView].Vm.ShowTimestamps}" />
+                            <TextBlock Grid.Column="1" Classes="tl" Classes.req="{Binding IsRequest}" Classes.resp="{Binding IsResponse}" Classes.err="{Binding IsError}" Text="{Binding Prefix}" FontWeight="Bold" />
+                            <TextBlock Grid.Column="2" Classes="tl" Classes.req="{Binding IsRequest}" Classes.resp="{Binding IsResponse}" Classes.err="{Binding IsError}" Text="{Binding Text}" TextWrapping="Wrap" />
+                            <TextBlock Grid.Column="3" Classes="tl" Text="{Binding Duration}" Opacity="0.5" FontSize="11" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <StackPanel Grid.Row="2" Spacing="10">
+            <ItemsControl ItemsSource="{Binding QuickCommands}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Button Classes="chip" Margin="0 0 6 6" Content="{Binding}" Command="{Binding $parent[v:TerminalView].Vm.UseQuickCommand}" CommandParameter="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox x:Name="InputBox" Classes="mono" Text="{Binding Input}" PlaceholderText="{loc:Tr 'ATZ   or   22 F1 90'}" FontSize="14" MinHeight="40" VerticalContentAlignment="Center">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding SendCommand}" />
+                        <KeyBinding Gesture="Up" Command="{Binding HistoryPreviousCommand}" />
+                        <KeyBinding Gesture="Down" Command="{Binding HistoryNextCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+                <Button Grid.Column="1" Classes="accent" Command="{Binding SendCommand}" Height="40" Padding="18 0">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><PathIcon Data="{x:Static svc:Icons.Send}" Width="14" Height="14" /><TextBlock Text="{loc:Tr 'Send'}" /></StackPanel>
+                </Button>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

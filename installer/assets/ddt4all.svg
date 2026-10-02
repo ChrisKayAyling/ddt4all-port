@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c3a5e"/><stop offset="1" stop-color="#0a1426"/></linearGradient></defs>
+  <rect width="1024" height="1024" rx="225" fill="url(#g)"/>
+  <g fill="#b8c7d9"><rect x="324" y="163" width="36" height="92" rx="12"/><rect x="324" y="768" width="36" height="92" rx="12"/><rect x="163" y="324" width="92" height="36" rx="12"/><rect x="768" y="324" width="92" height="36" rx="12"/><rect x="437" y="163" width="36" height="92" rx="12"/><rect x="437" y="768" width="36" height="92" rx="12"/><rect x="163" y="437" width="92" height="36" rx="12"/><rect x="768" y="437" width="92" height="36" rx="12"/><rect x="549" y="163" width="36" height="92" rx="12"/><rect x="549" y="768" width="36" height="92" rx="12"/><rect x="163" y="549" width="92" height="36" rx="12"/><rect x="768" y="549" width="92" height="36" rx="12"/><rect x="662" y="163" width="36" height="92" rx="12"/><rect x="662" y="768" width="36" height="92" rx="12"/><rect x="163" y="662" width="92" height="36" rx="12"/><rect x="768" y="662" width="92" height="36" rx="12"/></g>
+  <rect x="215" y="215" width="594" height="594" rx="61" fill="#e6eef6"/>
+  <rect x="237" y="237" width="550" height="550" rx="46" fill="#0d1b2f"/>
+  <circle cx="276" cy="276" r="18" fill="#27d7b0"/>
+  <polyline points="246,553 389,553 440,451 502,696 563,338 614,553 778,553" fill="none" stroke="#3af0c4" stroke-width="37" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
