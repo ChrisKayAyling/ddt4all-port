@@ -20,8 +20,9 @@ public sealed partial class DashboardViewModel : PageViewModel
     private bool _loading = true;
 
     public DashboardViewModel(IConnectionService connection, ISettingsService settings, INotificationService toasts,
-        INavigationService nav, ILogger<DashboardViewModel>? log = null)
+        INavigationService nav, ILogger<DashboardViewModel>? log = null, ScanViewModel? scan = null)
     {
+        Scan = scan;
         _connection = connection; _settings = settings; _toasts = toasts; _nav = nav; _log = log;
         var c = settings.Current.Connection;
         _transportIndex = c.Transport == "tcp" ? 1 : 0;
@@ -42,6 +43,9 @@ public sealed partial class DashboardViewModel : PageViewModel
         };
         _loading = false;
     }
+
+    /// <summary>ECU auto-scan section (null in tests that do not need it).</summary>
+    public ScanViewModel? Scan { get; }
 
     public override PageId Id => PageId.Dashboard;
     public override string Title => Loc.T("Connect");
@@ -91,6 +95,7 @@ public sealed partial class DashboardViewModel : PageViewModel
     public override void OnNavigatedTo()
     {
         if (Ports.Count <= 1 && !IsScanningPorts) _ = RefreshPortsAsync();
+        if (Scan is not null) _ = Scan.RefreshAsync();
     }
 
     [RelayCommand]

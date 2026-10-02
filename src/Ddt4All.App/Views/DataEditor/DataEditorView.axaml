@@ -1,0 +1,441 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:v="using:Ddt4All.App.Views"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.DataEditorView"
+             x:DataType="vm:DataEditorViewModel">
+    <UserControl.Styles>
+        <Style Selector="Border.warnpill"><Setter Property="Background" Value="{DynamicResource WarningSoftBrush}" /></Style>
+        <Style Selector="Border.errpill"><Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" /></Style>
+        <Style Selector="Border.infopill"><Setter Property="Background" Value="{DynamicResource InfoSoftBrush}" /></Style>
+        <Style Selector="Border.okpill"><Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}" /></Style>
+        <Style Selector="TextBox.invalid"><Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" /></Style>
+        <Style Selector="StackPanel.field > TextBlock.label"><Setter Property="Margin" Value="0 0 0 3" /></Style>
+        <Style Selector="TextBlock.err"><Setter Property="Foreground" Value="{DynamicResource DangerBrush}" /><Setter Property="FontSize" Value="12" /></Style>
+        <Style Selector="CheckBox"><Setter Property="MinHeight" Value="28" /></Style>
+    </UserControl.Styles>
+
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoCommand}" />
+        <KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoCommand}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
+    </UserControl.KeyBindings>
+    <UserControl.Resources>
+        <DataTemplate x:Key="ItemRow" x:DataType="vm:ItemEditVM">
+            <Grid ColumnDefinitions="2*,70,60,100,50,60,36" ColumnSpacing="8" Margin="0 2">
+                <Grid ColumnDefinitions="6,*" ColumnSpacing="6">
+                    <Border Background="{Binding Swatch}" CornerRadius="3" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding DataNames}" SelectedItem="{Binding Name}" HorizontalAlignment="Stretch" />
+                </Grid>
+                <TextBox Grid.Column="1" Classes="mono" Text="{Binding FirstByte}" />
+                <TextBox Grid.Column="2" Classes="mono" Text="{Binding BitOffset}" />
+                <ComboBox Grid.Column="3" SelectedIndex="{Binding EndianIndex}" HorizontalAlignment="Stretch">
+                    <ComboBoxItem Content="{loc:Tr 'Default'}" /><ComboBoxItem Content="{loc:Tr 'Little'}" /><ComboBoxItem Content="{loc:Tr 'Big'}" />
+                </ComboBox>
+                <CheckBox Grid.Column="4" IsChecked="{Binding Ref}" />
+                <TextBlock Grid.Column="5" Text="{Binding Summary}" Classes="mono caption" VerticalAlignment="Center" />
+                <Button Grid.Column="6" Classes="ghost" Command="{Binding RemoveCommand}"><PathIcon Data="{x:Static svc:Icons.Close}" Width="11" Height="11" /></Button>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- empty state -->
+        <Border Classes="card" IsVisible="{Binding NoEcu}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="40 32">
+            <StackPanel Spacing="10" Width="380">
+                <PathIcon Data="{x:Static svc:Icons.Edit}" Width="34" Height="34" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                <TextBlock Classes="h1" Text="{loc:Tr 'Data Editor'}" HorizontalAlignment="Center" />
+                <TextBlock Classes="muted" TextAlignment="Center" TextWrapping="Wrap" Text="{loc:Tr 'Edit the requests, data definitions and screens of an ECU. Open the ECU in the ECU Browser first, open a definition file, or start a new ECU.'}" />
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" Margin="0 8 0 0">
+                    <Button Classes="accent" Command="{Binding NewEcuCommand}"><TextBlock Text="{loc:Tr 'New ECU'}" /></Button>
+                    <Button Command="{Binding OpenFileCommand}"><TextBlock Text="{loc:Tr 'Open file...'}" /></Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28 24 28 20" RowSpacing="12" IsVisible="{Binding HasEcu}">
+            <!-- toolbar -->
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Button Command="{Binding NewEcuCommand}" ToolTip.Tip="{loc:Tr 'Create a new ECU definition'}"><TextBlock Text="{loc:Tr 'New'}" /></Button>
+                    <Button Command="{Binding OpenFileCommand}" ToolTip.Tip="{loc:Tr 'Open an ECU definition file'}"><PathIcon Data="{x:Static svc:Icons.Folder}" Width="14" Height="14" /></Button>
+                    <Border Width="1" Background="{DynamicResource BorderSubtleBrush}" Margin="4 4" />
+                    <Button Command="{Binding UndoCommand}" ToolTip.Tip="{loc:Tr 'Undo (Ctrl+Z)'}"><PathIcon Data="{x:Static svc:Icons.ChevronLeft}" Width="14" Height="14" /></Button>
+                    <Button Command="{Binding RedoCommand}" ToolTip.Tip="{loc:Tr 'Redo (Ctrl+Y)'}"><PathIcon Data="{x:Static svc:Icons.ChevronRight}" Width="14" Height="14" /></Button>
+                    <Border Width="1" Background="{DynamicResource BorderSubtleBrush}" Margin="4 4" />
+                    <Button Command="{Binding ExportXmlFileCommand}" ToolTip.Tip="{loc:Tr 'Export DDT XML to the user ECU folder'}"><TextBlock Text="{loc:Tr 'Export XML'}" /></Button>
+                    <Button Command="{Binding SaveToFolderCommand}" ToolTip.Tip="{loc:Tr 'Save JSON to another folder'}"><PathIcon Data="{x:Static svc:Icons.Folder}" Width="14" Height="14" /></Button>
+                    <Button Command="{Binding UseInSessionCommand}" ToolTip.Tip="{loc:Tr 'Use the edited definition for Requests and Screens'}"><TextBlock Text="{loc:Tr 'Use in session'}" /></Button>
+                    <Button Classes="accent" Command="{Binding SaveCommand}"><TextBlock Text="{loc:Tr 'Save'}" /></Button>
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="h1" Text="{loc:Tr 'Data Editor'}" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="muted" Text="{Binding TitleText}" FontWeight="SemiBold" />
+                        <TextBlock Classes="caption" Text="{Binding FilePath}" TextTrimming="CharacterEllipsis" MaxWidth="460" VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+
+            <Border Grid.Row="1" Classes="card" Padding="12 8" Background="{DynamicResource InfoSoftBrush}" IsVisible="{Binding SessionChanged}">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Command="{Binding ReloadFromSessionCommand}"><TextBlock Text="{loc:Tr 'Load session ECU'}" /></Button>
+                    <TextBlock VerticalAlignment="Center" Text="{loc:Tr 'A different ECU was opened in the session. Your unsaved edits are kept here.'}" />
+                </DockPanel>
+            </Border>
+
+            <!-- tabs -->
+            <ListBox Grid.Row="2" Classes="segmented" SelectedIndex="{Binding TabIndex}" HorizontalAlignment="Left" Width="640">
+                <ListBoxItem Content="{loc:Tr 'Requests'}" />
+                <ListBoxItem Content="{loc:Tr 'Data'}" />
+                <ListBoxItem Content="{loc:Tr 'ECU'}" />
+                <ListBoxItem Content="{loc:Tr 'Screens'}" />
+                <ListBoxItem Content="{Binding ValidationTabText}" />
+            </ListBox>
+
+            <Grid Grid.Row="3">
+                <!-- ============================ REQUESTS ============================ -->
+                <Grid ColumnDefinitions="310,*" ColumnSpacing="16" IsVisible="{Binding IsRequestsTab}">
+                    <Border Classes="card" Padding="0" ClipToBounds="True">
+                        <Grid RowDefinitions="Auto,*">
+                            <StackPanel Spacing="8" Margin="12">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+                                        <Button Classes="ghost" Command="{Binding AddRequestCommand}" ToolTip.Tip="{loc:Tr 'Add request'}"><TextBlock Text="+" FontSize="16" /></Button>
+                                        <Button Classes="ghost" Command="{Binding DuplicateRequestCommand}" ToolTip.Tip="{loc:Tr 'Duplicate'}"><PathIcon Data="{x:Static svc:Icons.Copy}" Width="13" Height="13" /></Button>
+                                        <Button Classes="ghost" Command="{Binding DeleteRequestCommand}" ToolTip.Tip="{loc:Tr 'Delete'}"><PathIcon Data="{x:Static svc:Icons.Delete}" Width="13" Height="13" /></Button>
+                                    </StackPanel>
+                                    <TextBlock Classes="caption" Text="{Binding RequestCountText}" VerticalAlignment="Center" />
+                                </DockPanel>
+                                <TextBox Text="{Binding RequestSearch}" PlaceholderText="{loc:Tr 'Search requests...'}" />
+                            </StackPanel>
+                            <ListBox Grid.Row="1" Classes="rows" ItemsSource="{Binding RequestRows}" SelectedItem="{Binding SelectedRequestRow}" Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:EditorRow">
+                                        <StackPanel Margin="14 0" Height="46" VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0 6 0 0" />
+                                            <TextBlock Text="{Binding Subtitle}" Classes="mono caption" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelectedRequest}">
+                        <StackPanel Spacing="14" Margin="0 0 8 0" DataContext="{Binding SelectedRequest}" x:DataType="vm:RequestEditVM">
+                            <Border Classes="card">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Classes="h2" Text="{loc:Tr 'Request'}" />
+                                    <Grid ColumnDefinitions="2*,*,*,*" ColumnSpacing="12">
+                                        <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Name'}" /><TextBox Text="{Binding Name, UpdateSourceTrigger=LostFocus}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="{loc:Tr 'Sent bytes (hex)'}" /><TextBox Classes="mono" Classes.invalid="{Binding SentError, Converter={x:Static ObjectConverters.IsNotNull}}" Text="{Binding SentBytes}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="2"><TextBlock Classes="label" Text="{loc:Tr 'Reply bytes (hex)'}" /><TextBox Classes="mono" Classes.invalid="{Binding ReplyError, Converter={x:Static ObjectConverters.IsNotNull}}" Text="{Binding ReplyBytes}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="3"><TextBlock Classes="label" Text="{loc:Tr 'Min reply bytes'}" /><TextBox Text="{Binding MinBytes}" /></StackPanel>
+                                    </Grid>
+                                    <TextBlock Classes="err" Text="{Binding SentError}" IsVisible="{Binding SentError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <TextBlock Classes="err" Text="{Binding ReplyError}" IsVisible="{Binding ReplyError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Denied in sessions'}" />
+                                            <WrapPanel>
+                                                <CheckBox Content="NoSDS" IsChecked="{Binding DenyNoSds}" Margin="0 0 12 0" />
+                                                <CheckBox Content="Plant" IsChecked="{Binding DenyPlant}" Margin="0 0 12 0" />
+                                                <CheckBox Content="AfterSales" IsChecked="{Binding DenyAfterSales}" Margin="0 0 12 0" />
+                                                <CheckBox Content="Engineering" IsChecked="{Binding DenyEngineering}" Margin="0 0 12 0" />
+                                                <CheckBox Content="Supplier" IsChecked="{Binding DenySupplier}" />
+                                            </WrapPanel>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Classes="field" Spacing="2">
+                                            <TextBlock Classes="label" Text="{loc:Tr 'Options'}" />
+                                            <CheckBox Content="{loc:Tr 'Manual send only'}" IsChecked="{Binding ManualSend}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="card">
+                                <StackPanel Spacing="10">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Command="{Binding AddSentCommand}"><TextBlock Text="{loc:Tr 'Add item'}" /></Button>
+                                        <TextBlock Classes="h2" Text="{loc:Tr 'Sent data items (inputs)'}" VerticalAlignment="Center" />
+                                    </DockPanel>
+                                    <Grid ColumnDefinitions="2*,70,60,100,50,60,36" ColumnSpacing="8" IsVisible="{Binding HasSent}">
+                                        <TextBlock Classes="caption" Text="{loc:Tr 'Data'}" Margin="12 0 0 0" /><TextBlock Grid.Column="1" Classes="caption" Text="{loc:Tr 'Byte'}" /><TextBlock Grid.Column="2" Classes="caption" Text="{loc:Tr 'Bit'}" />
+                                        <TextBlock Grid.Column="3" Classes="caption" Text="{loc:Tr 'Endian'}" /><TextBlock Grid.Column="4" Classes="caption" Text="Ref" /><TextBlock Grid.Column="5" Classes="caption" Text="{loc:Tr 'Size'}" />
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding SendItems}" ItemTemplate="{StaticResource ItemRow}" />
+                                    <v:BitGridControl Model="{Binding SentGrid}" SelectedItem="{Binding SelectedSent}" HorizontalAlignment="Left" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="card">
+                                <StackPanel Spacing="10">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Command="{Binding AddReceivedCommand}"><TextBlock Text="{loc:Tr 'Add item'}" /></Button>
+                                        <TextBlock Classes="h2" Text="{loc:Tr 'Received data items (outputs)'}" VerticalAlignment="Center" />
+                                    </DockPanel>
+                                    <Grid ColumnDefinitions="2*,70,60,100,50,60,36" ColumnSpacing="8" IsVisible="{Binding HasReceived}">
+                                        <TextBlock Classes="caption" Text="{loc:Tr 'Data'}" Margin="12 0 0 0" /><TextBlock Grid.Column="1" Classes="caption" Text="{loc:Tr 'Byte'}" /><TextBlock Grid.Column="2" Classes="caption" Text="{loc:Tr 'Bit'}" />
+                                        <TextBlock Grid.Column="3" Classes="caption" Text="{loc:Tr 'Endian'}" /><TextBlock Grid.Column="4" Classes="caption" Text="Ref" /><TextBlock Grid.Column="5" Classes="caption" Text="{loc:Tr 'Size'}" />
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding ReceiveItems}" ItemTemplate="{StaticResource ItemRow}" />
+                                    <v:BitGridControl Model="{Binding ReceivedGrid}" SelectedItem="{Binding SelectedReceived}" HorizontalAlignment="Left" />
+                                    <TextBlock Classes="caption" Text="{loc:Tr 'Byte 1 is the service id. Cells run from bit 7 (left) to bit 0; red cells are used by more than one item.'}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ============================ DATA ============================ -->
+                <Grid ColumnDefinitions="310,*" ColumnSpacing="16" IsVisible="{Binding IsDataTab}">
+                    <Border Classes="card" Padding="0" ClipToBounds="True">
+                        <Grid RowDefinitions="Auto,*">
+                            <StackPanel Spacing="8" Margin="12">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2">
+                                        <Button Classes="ghost" Command="{Binding AddDataCommand}" ToolTip.Tip="{loc:Tr 'Add data definition'}"><TextBlock Text="+" FontSize="16" /></Button>
+                                        <Button Classes="ghost" Command="{Binding DuplicateDataCommand}" ToolTip.Tip="{loc:Tr 'Duplicate'}"><PathIcon Data="{x:Static svc:Icons.Copy}" Width="13" Height="13" /></Button>
+                                        <Button Classes="ghost" Command="{Binding DeleteDataCommand}" ToolTip.Tip="{loc:Tr 'Delete'}"><PathIcon Data="{x:Static svc:Icons.Delete}" Width="13" Height="13" /></Button>
+                                    </StackPanel>
+                                    <TextBlock Classes="caption" Text="{Binding DataCountText}" VerticalAlignment="Center" />
+                                </DockPanel>
+                                <TextBox Text="{Binding DataSearch}" PlaceholderText="{loc:Tr 'Search data...'}" />
+                            </StackPanel>
+                            <ListBox Grid.Row="1" Classes="rows" ItemsSource="{Binding DataRows}" SelectedItem="{Binding SelectedDataRow}" Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:EditorRow">
+                                        <Grid Margin="14 0" Height="46" ColumnDefinitions="*,Auto">
+                                            <StackPanel VerticalAlignment="Center" Spacing="1">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Subtitle}" Classes="caption" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" Classes="pill" Classes.warnpill="{Binding Flag}" Background="{DynamicResource SurfaceHoverBrush}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Badge}" FontSize="10" Classes="muted" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelectedData}">
+                        <StackPanel Spacing="14" Margin="0 0 8 0" DataContext="{Binding SelectedData}" x:DataType="vm:DataEditVM">
+                            <Border Classes="card">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Classes="h2" Text="{loc:Tr 'Data definition'}" />
+                                    <Grid ColumnDefinitions="*,2*" ColumnSpacing="12">
+                                        <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Name'}" /><TextBox Text="{Binding Name, UpdateSourceTrigger=LostFocus}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="{loc:Tr 'Description'}" /><TextBox Text="{Binding Description}" /></StackPanel>
+                                    </Grid>
+                                    <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Comment'}" /><TextBox Text="{Binding Comment}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="54" MaxHeight="120" /></StackPanel>
+                                    <TextBlock Classes="caption" Text="{Binding UsedByText, StringFormat='Used by: {0}'}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="card">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Classes="h2" Text="{loc:Tr 'Type and size'}" />
+                                    <Grid ColumnDefinitions="100,100,*" ColumnSpacing="12">
+                                        <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Bits'}" /><TextBox Text="{Binding Bits}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="{loc:Tr 'Bytes'}" /><TextBox Text="{Binding Bytes}" /></StackPanel>
+                                        <WrapPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                            <CheckBox Content="{loc:Tr 'Signed'}" IsChecked="{Binding Signed}" Margin="0 0 14 0" />
+                                            <CheckBox Content="ASCII" IsChecked="{Binding Ascii}" Margin="0 0 14 0" />
+                                            <CheckBox Content="{loc:Tr 'Binary'}" IsChecked="{Binding Binary}" Margin="0 0 14 0" />
+                                            <CheckBox Content="{loc:Tr 'Scaled'}" IsChecked="{Binding Scaled}" />
+                                        </WrapPanel>
+                                    </Grid>
+                                    <TextBlock Classes="err" Text="{Binding WidthWarning}" IsVisible="{Binding WidthWarning, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="12" IsVisible="{Binding Scaled}">
+                                        <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Step'}" /><TextBox Classes="mono" Text="{Binding StepText}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="{loc:Tr 'Offset'}" /><TextBox Classes="mono" Text="{Binding OffsetText}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="2"><TextBlock Classes="label" Text="{loc:Tr 'Divide by'}" /><TextBox Classes="mono" Text="{Binding DivideByText}" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="3"><TextBlock Classes="label" Text="{loc:Tr 'Format'}" /><TextBox Classes="mono" Text="{Binding Format}" PlaceholderText="0.00" /></StackPanel>
+                                        <StackPanel Classes="field" Grid.Column="4"><TextBlock Classes="label" Text="{loc:Tr 'Unit'}" /><TextBox Text="{Binding Unit}" /></StackPanel>
+                                    </Grid>
+                                    <TextBlock Classes="err" Text="{Binding DivideWarning}" IsVisible="{Binding DivideWarning, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <TextBlock Classes="caption" IsVisible="{Binding Scaled}" Text="{loc:Tr 'Displayed value = (raw x step + offset) / divide by'}" />
+                                    <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="12 8">
+                                        <Grid ColumnDefinitions="Auto,150,Auto,*" ColumnSpacing="10">
+                                            <TextBlock Classes="caption" Text="{loc:Tr 'Try raw value (hex)'}" VerticalAlignment="Center" />
+                                            <TextBox Grid.Column="1" Classes="mono" Text="{Binding TestHex}" />
+                                            <TextBlock Grid.Column="2" Text="→" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="3" Text="{Binding TestResult}" Classes="mono" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="card">
+                                <StackPanel Spacing="8">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Command="{Binding AddEntryCommand}"><TextBlock Text="{loc:Tr 'Add value'}" /></Button>
+                                        <TextBlock Classes="h2" Text="{loc:Tr 'Enumeration (list of values)'}" VerticalAlignment="Center" />
+                                    </DockPanel>
+                                    <TextBlock Classes="muted" Text="{loc:Tr 'No list: the raw value is shown as hex or number. Add values to show text instead.'}" IsVisible="{Binding !HasEntries}" />
+                                    <ItemsControl ItemsSource="{Binding Entries}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ListEntryVM">
+                                                <Grid ColumnDefinitions="110,70,*,36" ColumnSpacing="8" Margin="0 2">
+                                                    <TextBox Text="{Binding Value}" Classes="mono" Classes.invalid="{Binding Duplicate}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Hex}" Classes="mono caption" VerticalAlignment="Center" />
+                                                    <TextBox Grid.Column="2" Text="{Binding Text}" />
+                                                    <Button Grid.Column="3" Classes="ghost" Command="{Binding RemoveCommand}"><PathIcon Data="{x:Static svc:Icons.Close}" Width="11" Height="11" /></Button>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ============================ ECU ============================ -->
+                <ScrollViewer IsVisible="{Binding IsEcuTab}" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="14" MaxWidth="900" HorizontalAlignment="Left" DataContext="{Binding EcuProps}" x:DataType="vm:EcuPropsVM">
+                        <Border Classes="card">
+                            <StackPanel Spacing="12">
+                                <TextBlock Classes="h2" Text="{loc:Tr 'Identity'}" />
+                                <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="12">
+                                    <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'ECU name'}" /><TextBox Text="{Binding EcuName}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="{loc:Tr 'Function name'}" /><TextBox Text="{Binding FuncName}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="2"><TextBlock Classes="label" Text="{loc:Tr 'Function address (hex)'}" /><TextBox Classes="mono" Text="{Binding FuncAddr}" /></StackPanel>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,2*" ColumnSpacing="12">
+                                    <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Byte order'}" />
+                                        <ComboBox SelectedIndex="{Binding EndianIndex}" HorizontalAlignment="Stretch">
+                                            <ComboBoxItem Content="{loc:Tr 'Default (big endian)'}" /><ComboBoxItem Content="{loc:Tr 'Little endian'}" /><ComboBoxItem Content="{loc:Tr 'Big endian'}" />
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="{loc:Tr 'Projects (comma separated)'}" /><TextBox Text="{Binding ProjectsText}" /></StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card">
+                            <StackPanel Spacing="12">
+                                <TextBlock Classes="h2" Text="{loc:Tr 'Protocol'}" />
+                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                                    <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Protocol'}" />
+                                        <ComboBox SelectedIndex="{Binding ProtocolIndex}" HorizontalAlignment="Stretch">
+                                            <ComboBoxItem Content="{loc:Tr 'None'}" /><ComboBoxItem Content="CAN" /><ComboBoxItem Content="KWP2000" /><ComboBoxItem Content="ISO8" /><ComboBoxItem Content="ISO" /><ComboBoxItem Content="DoIP" />
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="1" IsVisible="{Binding IsCan}"><TextBlock Classes="label" Text="{loc:Tr 'Send id (hex)'}" /><TextBox Classes="mono" Classes.invalid="{Binding SendIdError, Converter={x:Static ObjectConverters.IsNotNull}}" Text="{Binding SendId}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="2" IsVisible="{Binding IsCan}"><TextBlock Classes="label" Text="{loc:Tr 'Receive id (hex)'}" /><TextBox Classes="mono" Classes.invalid="{Binding RecvIdError, Converter={x:Static ObjectConverters.IsNotNull}}" Text="{Binding RecvId}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="3" IsVisible="{Binding IsCan}"><TextBlock Classes="label" Text="{loc:Tr 'Baud rate'}" /><TextBox Text="{Binding BaudRate}" /></StackPanel>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12" IsVisible="{Binding IsKLine}">
+                                    <StackPanel Classes="field"><TextBlock Classes="label" Text="KW1 (hex)" /><TextBox Classes="mono" Text="{Binding Kw1}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="KW2 (hex)" /><TextBox Classes="mono" Text="{Binding Kw2}" /></StackPanel>
+                                    <CheckBox Grid.Column="2" Content="{loc:Tr 'Fast init'}" IsChecked="{Binding FastInit}" IsVisible="{Binding IsKwp}" VerticalAlignment="Bottom" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Command="{Binding AddIdentCommand}"><TextBlock Text="{loc:Tr 'Add'}" /></Button>
+                                    <TextBlock Classes="h2" Text="{loc:Tr 'Auto identification'}" VerticalAlignment="Center" />
+                                </DockPanel>
+                                <Grid ColumnDefinitions="*,*,*,*,36" ColumnSpacing="8">
+                                    <TextBlock Classes="caption" Text="{loc:Tr 'Diag version'}" /><TextBlock Grid.Column="1" Classes="caption" Text="{loc:Tr 'Supplier'}" /><TextBlock Grid.Column="2" Classes="caption" Text="{loc:Tr 'Soft'}" /><TextBlock Grid.Column="3" Classes="caption" Text="{loc:Tr 'Version'}" />
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Idents}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:AutoIdentVM">
+                                            <Grid ColumnDefinitions="*,*,*,*,36" ColumnSpacing="8" Margin="0 2">
+                                                <TextBox Classes="mono" Text="{Binding DiagVersion}" /><TextBox Grid.Column="1" Classes="mono" Text="{Binding Supplier}" />
+                                                <TextBox Grid.Column="2" Classes="mono" Text="{Binding Soft}" /><TextBox Grid.Column="3" Classes="mono" Text="{Binding Version}" />
+                                                <Button Grid.Column="4" Classes="ghost" Command="{Binding RemoveCommand}"><PathIcon Data="{x:Static svc:Icons.Close}" Width="11" Height="11" /></Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Classes="caption" Text="{Binding DevicesText}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ============================ SCREENS ============================ -->
+                <Grid ColumnDefinitions="310,*" ColumnSpacing="16" IsVisible="{Binding IsScreensTab}">
+                    <Border Classes="card" Padding="0" ClipToBounds="True">
+                        <Grid RowDefinitions="Auto,*">
+                            <DockPanel Margin="12">
+                                <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding AddScreenCommand}" ToolTip.Tip="{loc:Tr 'Add screen'}"><TextBlock Text="+" FontSize="16" /></Button>
+                                <TextBlock Classes="caption" Text="{loc:Tr 'Screens'}" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <ListBox Grid.Row="1" Classes="rows" ItemsSource="{Binding Screens}" SelectedItem="{Binding SelectedScreen}" Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ScreenEditVM">
+                                        <StackPanel Margin="14 0" Height="46" VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0 6 0 0" />
+                                            <TextBlock Text="{Binding Category}" Classes="caption" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="14" Margin="0 0 8 0">
+                        <Border Classes="card" IsVisible="{Binding NoLayout}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h2" Text="{loc:Tr 'No screens'}" />
+                                <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:Tr 'This ECU has no screen layout. Add a screen to start one.'}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" IsVisible="{Binding SelectedScreen, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <StackPanel Spacing="12" DataContext="{Binding SelectedScreen}" x:DataType="vm:ScreenEditVM">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding DeleteCommand}"><StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Delete}" Width="13" Height="13" /><TextBlock Text="{loc:Tr 'Delete'}" /></StackPanel></Button>
+                                    <TextBlock Classes="h2" Text="{loc:Tr 'Screen'}" VerticalAlignment="Center" />
+                                </DockPanel>
+                                <Grid ColumnDefinitions="2*,*,*,*" ColumnSpacing="12">
+                                    <StackPanel Classes="field"><TextBlock Classes="label" Text="{loc:Tr 'Name'}" /><TextBox Text="{Binding Name, UpdateSourceTrigger=LostFocus}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="1"><TextBlock Classes="label" Text="{loc:Tr 'Width'}" /><TextBox Text="{Binding Width}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="2"><TextBlock Classes="label" Text="{loc:Tr 'Height'}" /><TextBox Text="{Binding Height}" /></StackPanel>
+                                    <StackPanel Classes="field" Grid.Column="3"><TextBlock Classes="label" Text="{loc:Tr 'Background'}" />
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6"><TextBox Classes="mono" Text="{Binding ColorHex, UpdateSourceTrigger=LostFocus}" /><Border Grid.Column="1" Width="30" Height="30" CornerRadius="6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"><Border.Background><SolidColorBrush Color="{Binding ColorBrushValue}" /></Border.Background></Border></Grid>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Classes="muted" Text="{Binding Summary}" />
+                                <Border Classes="pill warnpill" HorizontalAlignment="Left" IsVisible="{Binding HasMissing}"><TextBlock FontSize="12" TextWrapping="Wrap" Text="{Binding MissingText, StringFormat='Missing requests: {0}'}" /></Border>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <!-- ============================ VALIDATION ============================ -->
+                <Border Classes="card" Padding="0" ClipToBounds="True" IsVisible="{Binding IsValidationTab}">
+                    <Grid RowDefinitions="Auto,*">
+                        <DockPanel Margin="16 12">
+                            <Button DockPanel.Dock="Right" Command="{Binding RevalidateNowCommand}"><TextBlock Text="{loc:Tr 'Validate now'}" /></Button>
+                            <TextBlock Classes="h2" Text="{Binding IssueSummary}" VerticalAlignment="Center" />
+                        </DockPanel>
+                        <ListBox Grid.Row="1" Classes="rows" ItemsSource="{Binding Issues}" SelectedItem="{Binding SelectedIssue}" Background="Transparent" BorderThickness="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:IssueRow">
+                                    <Grid Height="38" ColumnDefinitions="84,70,200,*" Margin="16 0">
+                                        <Border Classes="pill" Classes.errpill="{Binding IsError}" Classes.warnpill="{Binding IsWarning}" Classes.infopill="{Binding IsInfo}" HorizontalAlignment="Left" VerticalAlignment="Center"><TextBlock Text="{Binding Severity}" FontSize="11" /></Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding Kind}" Classes="caption" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Target}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0 0 8 0" />
+                                        <TextBlock Grid.Column="3" Text="{Binding Message}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6" IsVisible="{Binding NoIssues}" IsHitTestVisible="False">
+                            <PathIcon Data="{x:Static svc:Icons.CheckCircle}" Width="32" Height="32" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" />
+                            <TextBlock Classes="muted" Text="{loc:Tr 'The definition looks consistent.'}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

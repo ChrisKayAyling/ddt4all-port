@@ -11,6 +11,12 @@ public sealed class FakeEcuCatalogService : IEcuCatalogService
 
     public string? DatabasePath => null;
     public bool IsAvailable => true;
+    public string? Error => null;
+    public Ddt4All.Core.Database.EcuDatabase? Database => null;
+    public event Action? Changed { add { } remove { } }
+    public Task<bool> SetDatabasePathAsync(string path, CancellationToken ct = default) => Task.FromResult(true);
+    public Task<Ddt4All.Core.Ecu.EcuFile> LoadEcuAsync(string href, CancellationToken ct = default) => throw new NotSupportedException("Fake catalog has no ECU definitions.");
+    public Task<Ddt4All.Core.Layout.EcuLayout?> LoadLayoutAsync(string href, CancellationToken ct = default) => Task.FromResult<Ddt4All.Core.Layout.EcuLayout?>(null);
 
     private static readonly string[] Names =
     [

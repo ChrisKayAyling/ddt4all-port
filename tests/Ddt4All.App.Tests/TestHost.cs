@@ -37,12 +37,18 @@ internal sealed class TestApp : IDisposable
     public AutoDialogs Dialogs { get; } = new();
     public string Home { get; } = Path.Combine(Path.GetTempPath(), "ddt4all-tests-" + Guid.NewGuid().ToString("N"));
 
-    public TestApp(string language = "en", string theme = "light", int width = 1280, int height = 780)
+    public TestApp(string language = "en", string theme = "light", int width = 1280, int height = 780, IEcuContext? ecuContext = null)
     {
         var settingsPath = Path.Combine(Home, "settings.json");
         Directory.CreateDirectory(Home);
         File.WriteAllText(settingsPath, $"{{\"language\":\"{language}\",\"theme\":\"{theme}\"}}");
-        Services = AppHost.Create(new AppHostOptions { SettingsPath = settingsPath, FileLogging = false, Dialogs = Dialogs });
+        Services = AppHost.Create(new AppHostOptions
+        {
+            SettingsPath = settingsPath, FileLogging = false, Dialogs = Dialogs, EcuContext = ecuContext,
+            // deterministic fakes: the real services are covered by RealServicesTests
+            Catalog = new Ddt4All.App.Services.Fakes.FakeEcuCatalogService(), Connection = new Ddt4All.App.Services.Fakes.FakeConnectionService(),
+            Diagnostics = new Ddt4All.App.Services.Fakes.FakeDiagnosticsService(), Sniffer = new Ddt4All.App.Services.Fakes.FakeSnifferService(),
+        });
         var settings = Services.GetRequiredService<ISettingsService>();
         Services.GetRequiredService<IThemeService>().Apply(settings.Current.Theme, settings.Current.Accent);
         Main = Services.GetRequiredService<MainWindowViewModel>();

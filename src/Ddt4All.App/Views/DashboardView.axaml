@@ -121,6 +121,57 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
+
+            <!-- ECU auto-scan -->
+            <Border Grid.Row="2" Grid.ColumnSpan="3" Classes="card" Margin="0 24 0 0">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="h2" Text="{loc:Tr 'Scan vehicle'}" />
+                            <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding Scan.Hint}" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Command="{Binding Scan.LocateDatabaseCommand}" IsVisible="{Binding Scan.DatabaseMissing}" VerticalAlignment="Top" Content="{loc:Tr 'Locate ecu.zip...'}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="260,16,Auto,*,Auto" IsEnabled="{Binding !Scan.IsScanning}">
+                        <StackPanel>
+                            <TextBlock Classes="label" Text="{loc:Tr 'Vehicle project'}" />
+                            <ComboBox ItemsSource="{Binding Scan.ProjectFilters}" SelectedItem="{Binding Scan.SelectedProject}" HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:ChoiceItem"><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <CheckBox Grid.Column="2" VerticalAlignment="Bottom" IsChecked="{Binding Scan.IncludeKLine}" Content="{loc:Tr 'Include K-line (slow)'}" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Classes="accent" Command="{Binding Scan.StartScanCommand}" Content="{loc:Tr 'Scan for ECUs'}" />
+                        <Button Command="{Binding Scan.CancelScanCommand}" IsVisible="{Binding Scan.IsScanning}" Content="{loc:Tr 'Cancel'}" />
+                    </StackPanel>
+                    <StackPanel Spacing="6" IsVisible="{Binding Scan.HasScanned}">
+                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding Scan.Progress}" />
+                        <TextBlock Classes="caption" Text="{Binding Scan.StatusText}" />
+                    </StackPanel>
+                    <TextBlock IsVisible="{Binding Scan.NoResults}" Classes="muted" Text="{loc:Tr 'No ECU answered. Check the ignition, the adapter and the selected project.'}" />
+                    <ItemsControl ItemsSource="{Binding Scan.Results}" IsVisible="{Binding Scan.HasResults}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ScanRow">
+                                <Border Padding="0 8" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 0 0 1">
+                                    <Grid ColumnDefinitions="50,*,Auto" ColumnSpacing="12">
+                                        <TextBlock Classes="mono" FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding Address}" />
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock FontWeight="Medium" Text="{Binding EcuName}" TextWrapping="Wrap" />
+                                            <TextBlock Classes="caption" Text="{Binding AddressName}" />
+                                            <TextBlock Classes="caption mono" Text="{Binding Ident}" />
+                                            <TextBlock Classes="caption" Foreground="{DynamicResource SuccessBrush}" Text="{Binding MatchText}" IsVisible="{Binding IsExact}" />
+                                            <TextBlock Classes="caption" Foreground="{DynamicResource WarningBrush}" Text="{Binding MatchText}" IsVisible="{Binding IsApproximate}" />
+                                            <TextBlock Classes="caption" Foreground="{DynamicResource DangerBrush}" Text="{Binding MatchText}" IsVisible="{Binding IsUnknown}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" VerticalAlignment="Center" Command="{Binding OpenCommand}" IsEnabled="{Binding CanOpen}" Content="{loc:Tr 'Open'}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
         </Grid>
     </ScrollViewer>
 </UserControl>

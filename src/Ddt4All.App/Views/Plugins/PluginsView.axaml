@@ -1,0 +1,249 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:vmp="using:Ddt4All.App.ViewModels.Plugins"
+             xmlns:m="using:Ddt4All.App.Models"
+             xmlns:v="using:Ddt4All.App.Views"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.Plugins.PluginsView"
+             x:DataType="vmp:PluginsViewModel">
+    <UserControl.Styles>
+        <Style Selector="TextBlock.logtext"><Setter Property="FontFamily" Value="{DynamicResource MonoFont}" /><Setter Property="FontSize" Value="12" /><Setter Property="TextWrapping" Value="Wrap" /><Setter Property="Foreground" Value="{DynamicResource TerminalFgBrush}" /></Style>
+        <Style Selector="TextBlock.logtext.tx"><Setter Property="Foreground" Value="#7FB4FF" /></Style>
+        <Style Selector="TextBlock.logtext.step"><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="Foreground" Value="#FFFFFF" /></Style>
+        <Style Selector="TextBlock.logtext.warn"><Setter Property="Foreground" Value="#E5C07B" /></Style>
+        <Style Selector="TextBlock.logtext.err"><Setter Property="Foreground" Value="#FF7B7B" /></Style>
+        <Style Selector="TextBlock.logtext.res"><Setter Property="Foreground" Value="#7EE787" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+        <Style Selector="Border.result"><Setter Property="CornerRadius" Value="8" /><Setter Property="Padding" Value="12 10" /><Setter Property="BorderThickness" Value="1" /><Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" /></Style>
+        <Style Selector="Border.result.ok"><Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}" /></Style>
+        <Style Selector="Border.result.warn"><Setter Property="Background" Value="{DynamicResource WarningSoftBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}" /></Style>
+        <Style Selector="Border.result.bad"><Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" /></Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="340,*" Margin="28 24 28 20" ColumnSpacing="20">
+        <!-- ===================== list ===================== -->
+        <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
+            <StackPanel Spacing="2">
+                <TextBlock Classes="h1" Text="{loc:Tr 'Plugins'}" />
+                <TextBlock Classes="muted" Text="{Binding ResultSummary}" />
+            </StackPanel>
+            <TextBox Grid.Row="1" Text="{Binding SearchText}" PlaceholderText="{loc:Tr 'Search plugins...'}">
+                <TextBox.InnerLeftContent><PathIcon Data="{x:Static svc:Icons.Search}" Width="14" Height="14" Margin="10 0 0 0" Foreground="{DynamicResource TextMutedBrush}" /></TextBox.InnerLeftContent>
+            </TextBox>
+            <ComboBox Grid.Row="2" HorizontalAlignment="Stretch" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}">
+                <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:ChoiceItem"><TextBlock Text="{Binding Title}" /></DataTemplate></ComboBox.ItemTemplate>
+            </ComboBox>
+            <Border Grid.Row="3" Classes="card" Padding="0" ClipToBounds="True">
+                <Grid>
+                    <v:EcuListBox Classes="rows" ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}" IsEnabled="{Binding CanSelectPlugin}" Background="Transparent" BorderThickness="0" Padding="0">
+                        <v:EcuListBox.DataTemplates>
+                            <DataTemplate DataType="m:GroupHeaderRow">
+                                <Grid Height="34" ColumnDefinitions="*,Auto" Margin="16 0">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource SystemControlHighlightAccentBrush}" />
+                                    <Border Grid.Column="1" Classes="pill" Background="{DynamicResource SurfaceHoverBrush}" VerticalAlignment="Center"><TextBlock Text="{Binding Count}" FontSize="11" Classes="muted" /></Border>
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="vmp:PluginRow">
+                                <Grid MinHeight="54" ColumnDefinitions="*,Auto" Margin="16 6">
+                                    <StackPanel VerticalAlignment="Center" Spacing="1">
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" FontWeight="Medium" />
+                                        <TextBlock Text="{Binding Vehicle}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="8 0 0 0">
+                                        <Border Classes="pill" Background="{DynamicResource WarningSoftBrush}" IsVisible="{Binding IsExperimental}"><TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}" Text="{loc:Tr 'EXPERIMENTAL'}" /></Border>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </v:EcuListBox.DataTemplates>
+                    </v:EcuListBox>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4" IsVisible="{Binding IsEmpty}" IsHitTestVisible="False">
+                        <PathIcon Data="{x:Static svc:Icons.Search}" Width="28" Height="28" Foreground="{DynamicResource TextMutedBrush}" />
+                        <TextBlock Classes="muted" Text="{loc:Tr 'No plugin matches.'}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ===================== detail ===================== -->
+        <Border Grid.Column="1" Classes="card" Padding="0" ClipToBounds="True">
+            <Grid>
+                <StackPanel IsVisible="{Binding NoSelection}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                    <PathIcon Data="{x:Static svc:Icons.Plugin}" Width="34" Height="34" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Classes="muted" Text="{loc:Tr 'Select a plugin to see what it does and which warnings apply.'}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="320" />
+                </StackPanel>
+
+                <Grid IsVisible="{Binding HasSelection}" RowDefinitions="*,Auto">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="16" Margin="22 20">
+                        <!-- header -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="h1" Text="{Binding DetailName}" TextWrapping="Wrap" />
+                            <TextBlock Classes="muted" Text="{Binding DetailVehicle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Classes="pill" Background="{DynamicResource InfoSoftBrush}"><TextBlock FontSize="11" Text="{Binding DetailCategory}" /></Border>
+                                <Border Classes="pill" Background="{DynamicResource WarningSoftBrush}" IsVisible="{Binding IsExperimental}"><TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}" Text="{loc:Tr 'EXPERIMENTAL'}" /></Border>
+                                <Border Classes="pill" Background="{DynamicResource SurfaceHoverBrush}" IsVisible="{Binding NeedsHardware}"><TextBlock FontSize="11" Classes="muted" Text="{loc:Tr 'Needs an adapter'}" /></Border>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Text="{Binding DetailDescription}" TextWrapping="Wrap" />
+
+                        <!-- warnings -->
+                        <Border Classes="result bad" IsVisible="{Binding HasWarnings}">
+                            <StackPanel Spacing="6">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{x:Static svc:Icons.Warning}" Width="16" Height="16" Foreground="{DynamicResource DangerBrush}" />
+                                    <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}" Text="{loc:Tr 'Warnings'}" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding Warnings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Grid ColumnDefinitions="Auto,*" Margin="0 2"><TextBlock Text="&#8226;" Margin="0 0 8 0" /><TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" /></Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- preconditions -->
+                        <Border Classes="result" IsVisible="{Binding HasInstructions}" Background="{DynamicResource InfoSoftBrush}">
+                            <StackPanel Spacing="6">
+                                <TextBlock FontWeight="SemiBold" Text="{loc:Tr 'Before you start'}" />
+                                <ItemsControl ItemsSource="{Binding Instructions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Grid ColumnDefinitions="Auto,*" Margin="0 2"><TextBlock Text="&#8226;" Margin="0 0 8 0" /><TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" /></Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="6" IsVisible="{Binding HasEcu}">
+                            <TextBlock Classes="caption" Text="{loc:Tr 'ECU definition'}" />
+                            <TextBlock Grid.Column="1" Classes="mono" FontSize="12" Text="{Binding EcuDefinition}" TextWrapping="Wrap" />
+                            <TextBlock Grid.Row="1" Classes="caption" Text="{loc:Tr 'Protocol'}" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProtocolText}" />
+                        </Grid>
+
+                        <!-- actions -->
+                        <TextBlock Classes="h2" Text="{loc:Tr 'Actions'}" />
+                        <ItemsControl ItemsSource="{Binding Actions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vmp:PluginActionViewModel">
+                                    <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0 0 0 8" Background="{DynamicResource SurfaceAltBrush}">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                            <StackPanel Spacing="6">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                    <Border Classes="pill" Background="{DynamicResource DangerSoftBrush}" IsVisible="{Binding Writes}"><TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}" Text="{loc:Tr 'WRITES TO ECU'}" /></Border>
+                                                    <Border Classes="pill" Background="{DynamicResource SuccessSoftBrush}" IsVisible="{Binding IsReadOnly}"><TextBlock FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SuccessBrush}" Text="{loc:Tr 'READ-ONLY'}" /></Border>
+                                                </StackPanel>
+                                                <TextBlock Classes="caption" Text="{Binding Description}" TextWrapping="Wrap" />
+                                                <ItemsControl ItemsSource="{Binding Parameters}" IsVisible="{Binding HasParameters}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vmp:PluginParamViewModel">
+                                                            <StackPanel Margin="0 4 0 0" Spacing="2">
+                                                                <TextBlock Classes="label" Text="{Binding Label}" Margin="0" />
+                                                                <TextBox IsVisible="{Binding IsText}" Text="{Binding Value}" PlaceholderText="{Binding Placeholder}" MaxWidth="360" HorizontalAlignment="Left" MinWidth="260" Classes.mono="{Binding IsMono}" />
+                                                                <ComboBox IsVisible="{Binding IsChoice}" ItemsSource="{Binding Choices}" SelectedItem="{Binding Value}" MinWidth="260" />
+                                                                <TextBlock Classes="caption" Text="{Binding Description}" TextWrapping="Wrap" IsVisible="{Binding !HasError}" />
+                                                                <TextBlock Classes="caption" Foreground="{DynamicResource DangerBrush}" Text="{Binding Error}" TextWrapping="Wrap" IsVisible="{Binding HasError}" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Top" MinWidth="150">
+                                                <Button Classes="accent" Command="{Binding RunCommand}" IsVisible="{Binding IsReadOnly}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Play}" Width="12" Height="12" /><TextBlock Text="{loc:Tr 'Run'}" /></StackPanel>
+                                                </Button>
+                                                <Button Classes="danger" Command="{Binding RunCommand}" IsVisible="{Binding Writes}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Shield}" Width="12" Height="12" /><TextBlock Text="{loc:Tr 'Review and run...'}" /></StackPanel>
+                                                </Button>
+                                                <TextBlock Classes="caption" Text="{Binding BlockReason}" IsVisible="{Binding HasBlockReason}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="170" HorizontalAlignment="Center" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+                <Border Grid.Row="1" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 1 0 0" Background="{DynamicResource SurfaceAltBrush}" Padding="22 14" IsVisible="{Binding HasRunPanel}">
+                    <StackPanel Spacing="10">
+                        <!-- explicit confirmation -->
+                        <Border Classes="result bad" IsVisible="{Binding IsConfirming}" BorderThickness="2">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{x:Static svc:Icons.Shield}" Width="18" Height="18" Foreground="{DynamicResource DangerBrush}" />
+                                    <TextBlock FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource DangerBrush}" Text="{Binding ConfirmTitle}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding ConfirmTarget}" TextWrapping="Wrap" />
+                                <TextBlock Text="{loc:Tr 'Make sure the battery is charged and the vehicle is stable. A write cannot be undone and an interrupted write can leave the ECU unusable.'}" TextWrapping="Wrap" />
+                                <CheckBox IsChecked="{Binding Acknowledged}" Content="{loc:Tr 'I have read the warnings above and I understand the risks'}" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="danger" Command="{Binding ConfirmAndRunCommand}" IsEnabled="{Binding CanConfirm}" Content="{loc:Tr 'Confirm and run'}" />
+                                    <Button Command="{Binding CancelConfirmationCommand}" Content="{loc:Tr 'Cancel'}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- operator prompt -->
+                        <Border Classes="result" IsVisible="{Binding HasPrompt}" Background="{DynamicResource InfoSoftBrush}" BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}" BorderThickness="2">
+                            <StackPanel Spacing="10">
+                                <TextBlock FontWeight="SemiBold" Text="{Binding PromptTitle}" />
+                                <TextBlock Text="{Binding PromptMessage}" TextWrapping="Wrap" />
+                                <ItemsControl ItemsSource="{Binding PromptChoices}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vmp:PromptChoice"><Button Command="{Binding Command}" Content="{Binding Text}" Classes.accent="{Binding IsPrimary}" /></DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- progress + log -->
+                        <StackPanel Spacing="8" IsVisible="{Binding HasLog}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Classes="h2" Text="{loc:Tr 'Progress'}" VerticalAlignment="Center" />
+                                    <TextBlock Classes="muted" Text="{Binding StatusText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Command="{Binding CancelRunCommand}" IsVisible="{Binding IsRunning}" Content="{loc:Tr 'Cancel'}" />
+                            </Grid>
+                            <ProgressBar Height="6" Minimum="0" Maximum="1" Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" />
+                            <Border Background="{DynamicResource TerminalBgBrush}" CornerRadius="8" Height="190" ClipToBounds="True">
+                                <ListBox x:Name="LogList" Classes="rows" ItemsSource="{Binding Log}" Background="Transparent" BorderThickness="0" Padding="10 6" SelectionMode="Single">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vmp:PluginLogLine">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="0 1">
+                                                <TextBlock Text="{Binding Time}" Classes="logtext" Opacity="0.5" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Text}" Classes="logtext" Classes.tx="{Binding IsTx}" Classes.step="{Binding IsStep}" Classes.warn="{Binding IsWarning}" Classes.err="{Binding IsError}" Classes.res="{Binding IsResult}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- result -->
+                        <Border Classes="result" Classes.ok="{Binding ResultIsSuccess}" Classes.warn="{Binding ResultIsWarning}" Classes.bad="{Binding ResultIsFailure}" IsVisible="{Binding HasResult}">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="{Binding ResultText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <ItemsControl ItemsSource="{Binding ResultValues}" IsVisible="{Binding HasResultValues}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <TextBlock Text="{Binding}" Classes="mono" FontSize="12" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

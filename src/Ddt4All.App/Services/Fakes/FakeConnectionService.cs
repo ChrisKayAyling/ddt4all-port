@@ -16,6 +16,7 @@ public sealed partial class FakeConnectionService : ObservableObject, IConnectio
     [ObservableProperty] private string _statusText = Loc.T("Disconnected");
     [ObservableProperty] private AdapterInfo? _adapter;
     public IEcuTransport? Transport { get; private set; }
+    public Ddt4All.Comms.IAddressableTransport? AddressableTransport => null;
 
     public async Task<IReadOnlyList<SerialPortInfo>> ListPortsAsync(CancellationToken ct = default)
     {

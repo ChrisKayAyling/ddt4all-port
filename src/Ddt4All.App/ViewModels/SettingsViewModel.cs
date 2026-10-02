@@ -41,9 +41,18 @@ public sealed partial class SettingsViewModel : PageViewModel
     public override PageId Id => PageId.Settings;
     public override string Title => Loc.T("Settings");
 
-    public sealed record LanguageChoice(string Code, string Name, LanguageInfo? Info)
+    /// <summary>Language combo item; "System default" is translated and re-evaluated when the language changes.</summary>
+    public sealed class LanguageChoice : ObservableObject
     {
-        public string Display => Code == Loc.SystemCode ? $"{Loc.T("System default")}" : Name;
+        public LanguageChoice(string code, string name, LanguageInfo? info)
+        {
+            Code = code; Name = name; Info = info;
+            if (code == Loc.SystemCode) Loc.Instance.LanguageChanged += () => Avalonia.Threading.Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Display)));
+        }
+        public string Code { get; }
+        public string Name { get; }
+        public LanguageInfo? Info { get; }
+        public string Display => Code == Loc.SystemCode ? Loc.T("System default") : Name;
         public override string ToString() => Display;
     }
 

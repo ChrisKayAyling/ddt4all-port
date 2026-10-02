@@ -9,6 +9,8 @@ public sealed class EcuEntry
     public required string Protocol { get; init; }     // CAN, KWP2000, ISO8, DoIP ...
     public required string Project { get; init; }      // vehicle project code, e.g. "X98"
     public string ProjectName { get; init; } = "";
+    /// <summary>Functional group ("Injection", "UCH"...), empty when unknown.</summary>
+    public string Group { get; init; } = "";
     public string Supplier { get; init; } = "";
     public string Version { get; init; } = "";
     public string File { get; init; } = "";

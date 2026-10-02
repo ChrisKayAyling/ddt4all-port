@@ -21,6 +21,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- ECU fixtures of the Core tests: the real-service tests build an ecu.zip from them with EcuZipBuilder -->
+    <Content Include="..\Ddt4All.Core.Tests\TestData\*.xml" Link="TestData\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Ddt4All.Plugins.Tests\TestSupport.cs" Link="Plugins\TestSupport.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Ddt4All.App\Ddt4All.App.csproj" />
   </ItemGroup>
 

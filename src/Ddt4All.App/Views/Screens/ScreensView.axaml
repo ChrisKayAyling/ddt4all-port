@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels.Screens"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             xmlns:sc="using:Ddt4All.App.Views.Screens"
+             x:Class="Ddt4All.App.Views.Screens.ScreensView"
+             x:DataType="vm:ScreensViewModel">
+    <UserControl.Styles>
+        <Style Selector="TreeViewItem"><Setter Property="IsExpanded" Value="True" /><Setter Property="MinHeight" Value="30" /></Style>
+        <Style Selector="Button.tool"><Setter Property="Padding" Value="9 5" /><Setter Property="MinHeight" Value="32" /></Style>
+        <Style Selector="ToggleButton.tool:not(:checked)"><Setter Property="Background" Value="{DynamicResource SurfaceBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" /></Style>
+        <Style Selector="ToggleButton.tool"><Setter Property="Padding" Value="9 5" /><Setter Property="MinHeight" Value="32" /><Setter Property="CornerRadius" Value="6" /></Style>
+    </UserControl.Styles>
+    <Grid ColumnDefinitions="272,*" Margin="20 18 20 16" ColumnSpacing="14">
+        <!-- screen tree -->
+        <Border Classes="card" Padding="0" ClipToBounds="True">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <StackPanel Margin="14 12 14 8" Spacing="2">
+                    <TextBlock Classes="h2" Text="{loc:Tr 'Screens'}" />
+                    <TextBlock Classes="caption" Text="{Binding EcuTitle}" TextTrimming="CharacterEllipsis" IsVisible="{Binding HasEcu}" />
+                </StackPanel>
+                <TextBox Grid.Row="1" Margin="12 0 12 8" Text="{Binding FilterText}" Watermark="{loc:Tr 'Filter screens'}" IsVisible="{Binding HasEcu}" />
+                <TreeView Grid.Row="2" ItemsSource="{Binding Nodes}" SelectedItem="{Binding SelectedNode, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Padding="4 0 4 8">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding Children}" x:DataType="vm:ScreenNode">
+                            <Grid ColumnDefinitions="*,Auto" Margin="0 1">
+                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontWeight="{Binding IsCategory, Converter={x:Static sc:Converters.BoldIfTrue}}" />
+                                <TextBlock Grid.Column="1" Classes="caption" Text="{Binding Detail}" Margin="8 0 6 0" VerticalAlignment="Center" />
+                            </Grid>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Grid>
+        </Border>
+
+        <!-- main -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" RowSpacing="12">
+            <Border Classes="card" Padding="10 8">
+                <WrapPanel ItemSpacing="6" LineSpacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Button Classes="tool accent" Command="{Binding StartCommand}" ToolTip.Tip="{loc:Tr 'Start live data'}">
+                            <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Play}" Width="13" Height="13" /><TextBlock Text="{loc:Tr 'Start'}" /></StackPanel>
+                        </Button>
+                        <Button Classes="tool" Command="{Binding PauseCommand}" ToolTip.Tip="{loc:Tr 'Pause / resume'}">
+                            <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="M6 19h4V5H6v14zm8-14v14h4V5h-4z" Width="13" Height="13" /><TextBlock Text="{loc:Tr 'Pause'}" /></StackPanel>
+                        </Button>
+                        <Button Classes="tool" Command="{Binding StopCommand}" ToolTip.Tip="{loc:Tr 'Stop live data'}">
+                            <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Stop}" Width="13" Height="13" /><TextBlock Text="{loc:Tr 'Stop'}" /></StackPanel>
+                        </Button>
+                        <Border Width="1" Height="22" Background="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
+                        <TextBlock Classes="caption" Text="{loc:Tr 'Rate'}" VerticalAlignment="Center" />
+                        <Slider Width="90" Minimum="1" Maximum="30" Value="{Binding RateHz}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" />
+                        <TextBlock Classes="mono" Width="44" VerticalAlignment="Center" Text="{Binding RateHz, StringFormat='{}{0:0} Hz'}" />
+                        <Border Width="1" Height="22" Background="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
+                        <Button Classes="tool ghost" Command="{Binding ZoomOutCommand}" Content="-" ToolTip.Tip="{loc:Tr 'Zoom out (Ctrl+wheel)'}" />
+                        <Button Classes="tool ghost" Command="{Binding ZoomResetCommand}" Content="{Binding ZoomText}" MinWidth="52" ToolTip.Tip="{loc:Tr 'Reset zoom'}" />
+                        <Button Classes="tool ghost" Command="{Binding ZoomInCommand}" Content="+" ToolTip.Tip="{loc:Tr 'Zoom in'}" />
+                        <Button Classes="tool ghost" x:Name="FitButton" Content="{loc:Tr 'Fit'}" />
+                        <Border Width="1" Height="22" Background="{DynamicResource BorderSubtleBrush}" Margin="4 0" />
+                        <ToggleButton Classes="tool" IsChecked="{Binding IsRecording, Mode=OneWay}" Command="{Binding ToggleRecordCommand}" ToolTip.Tip="{loc:Tr 'Record values in memory'}">
+                            <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="M12 7a5 5 0 100 10 5 5 0 000-10z" Width="13" Height="13" Foreground="{DynamicResource DangerBrush}" /><TextBlock Text="{loc:Tr 'Record'}" /></StackPanel>
+                        </ToggleButton>
+                        <Button Classes="tool" Command="{Binding ExportCommand}" ToolTip.Tip="{loc:Tr 'Export the recording as CSV'}" Content="{loc:Tr 'Export CSV'}" />
+                        <ToggleButton Classes="tool" IsChecked="{Binding IsLogging, Mode=OneWay}" Command="{Binding ToggleLogCommand}" ToolTip.Tip="{loc:Tr 'Stream every cycle to a CSV file'}" Content="{loc:Tr 'Log to file'}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Button Classes="tool" Command="{Binding ClearStagedCommand}" IsVisible="{Binding HasStaged}" Content="{loc:Tr 'Discard edits'}" />
+                        <Button Classes="tool danger" Command="{Binding SendStagedCommand}" IsVisible="{Binding HasStaged}" ToolTip.Tip="{loc:Tr 'Expert mode required'}" Content="{loc:Tr 'Send inputs'}" />
+                    </StackPanel>
+                </WrapPanel>
+            </Border>
+
+            <Border Grid.Row="1" Classes="card" Padding="0" ClipToBounds="True">
+                <Grid>
+                    <ScrollViewer x:Name="Scroller" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="{DynamicResource SurfaceAltBrush}" IsVisible="{Binding HasScreen}">
+                        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" BoxShadow="0 2 10 0 #30000000">
+                            <sc:ScreenCanvas x:Name="Canvas" Zoom="{Binding Zoom, Mode=TwoWay}" ButtonsEnabled="{Binding IsExpert}" />
+                        </Border>
+                    </ScrollViewer>
+                    <StackPanel IsVisible="{Binding !HasScreen}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="420">
+                        <PathIcon Data="{x:Static svc:Icons.Screens}" Width="40" Height="40" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Classes="h2" Text="{Binding EmptyTitle}" HorizontalAlignment="Center" />
+                        <TextBlock Classes="muted" Text="{Binding EmptyText}" TextWrapping="Wrap" TextAlignment="Center" />
+                        <Button Classes="accent" HorizontalAlignment="Center" Command="{Binding OpenEcuBrowserCommand}" Content="{loc:Tr 'Open ECU Browser'}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Classes="card" Padding="12 10">
+                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="230,*" ColumnSpacing="16" RowSpacing="8">
+                    <StackPanel Spacing="3">
+                        <TextBlock Classes="caption" Text="{loc:Tr 'Selected value (click a display)'}" />
+                        <TextBlock Classes="h2" Text="{Binding SelectedName}" TextTrimming="CharacterEllipsis" IsVisible="{Binding HasSelection}" />
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding SelectedValue}" IsVisible="{Binding HasSelection}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="caption mono" Text="{Binding SelectedRange}" TextWrapping="Wrap" IsVisible="{Binding HasSelection}" />
+                        <TextBlock Classes="muted" Text="{loc:Tr 'No display selected'}" IsVisible="{Binding !HasSelection}" />
+                    </StackPanel>
+                    <sc:SparklineControl Grid.Column="1" x:Name="Spark" Height="84" Stroke="{DynamicResource SystemControlHighlightAccentBrush}" TextBrush="{DynamicResource TextMutedBrush}" GridBrush="{DynamicResource BorderSubtleBrush}" />
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Classes="caption" Text="{Binding WriteHint}" Foreground="{DynamicResource WarningBrush}" TextTrimming="CharacterEllipsis" />
+                    <DockPanel Grid.Row="2" Grid.ColumnSpan="2">
+                        <TextBlock DockPanel.Dock="Right" Classes="caption mono" Text="{Binding PerfText}" />
+                        <TextBlock DockPanel.Dock="Right" Classes="caption" Text="{Binding RecordedText}" Margin="0 0 16 0" />
+                        <TextBlock Classes="caption" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" />
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

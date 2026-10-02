@@ -16,13 +16,17 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     private readonly SessionState _session;
     private readonly ISettingsService _settings;
     private readonly ILogger<EcuBrowserViewModel>? _log;
+    private readonly IEcuSession? _ecuSession;
+    private readonly IFilePickerService? _picker;
     private EcuCatalog _data = EcuCatalog.Empty;
     private CancellationTokenSource? _filterCts;
     private bool _loaded;
 
     public EcuBrowserViewModel(IEcuCatalogService catalog, INavigationService nav, INotificationService toasts,
-        SessionState session, ISettingsService settings, ILogger<EcuBrowserViewModel>? log = null)
+        SessionState session, ISettingsService settings, ILogger<EcuBrowserViewModel>? log = null,
+        IEcuSession? ecuSession = null, IFilePickerService? picker = null)
     {
+        _ecuSession = ecuSession; _picker = picker;
         _catalog = catalog; _nav = nav; _toasts = toasts; _session = session; _settings = settings; _log = log;
         GroupModes = [new("none", "No grouping"), new("project", "By project"), new("protocol", "By protocol")];
         _selectedGroupMode = GroupModes[1];
@@ -30,6 +34,8 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
         ProtocolFilters = [new ChoiceItem(AllKey, "All protocols")];
         _selectedProject = ProjectFilters[0];
         _selectedProtocol = ProtocolFilters[0];
+        catalog.Changed += () => Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        { OnPropertyChanged(nameof(DatabaseMissing)); OnPropertyChanged(nameof(DatabasePath)); OnPropertyChanged(nameof(DatabaseError)); OnPropertyChanged(nameof(EmptyText)); });
     }
 
     public override PageId Id => PageId.EcuBrowser;
@@ -53,6 +59,8 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     public bool NoSelection => SelectedEntry is null;
     public bool DatabaseMissing => !_catalog.IsAvailable;
     public string? DatabasePath => _catalog.DatabasePath;
+    public string? DatabaseError => _catalog.Error;
+    public string EmptyText => DatabaseMissing ? Loc.T("No database found") : Loc.T("No ECUs match your filters.");
     public bool IsEmpty => !IsLoading && Rows.Count == 0;
 
     partial void OnSelectedRowChanged(object? value) => SelectedEntry = value as EcuEntry;
@@ -159,10 +167,33 @@ public sealed partial class EcuBrowserViewModel : PageViewModel
     }
 
     [RelayCommand]
-    private void OpenEcu(EcuEntry? entry)
+    private async Task LocateDatabaseAsync()
+    {
+        if (_picker is null) { _nav.NavigateTo(PageId.Settings); return; }
+        var path = await _picker.PickFileAsync(Loc.T("Locate ecu.zip"), (Loc.T("ECU database"), ["*.zip"]));
+        if (path is null) return;
+        if (await _catalog.SetDatabasePathAsync(path)) await LoadAsync();
+        else _toasts.Error(Loc.T("No database found"), _catalog.Error);
+        OnPropertyChanged(nameof(DatabaseMissing)); OnPropertyChanged(nameof(EmptyText));
+    }
+
+    [RelayCommand]
+    private async Task OpenEcuAsync(EcuEntry? entry)
     {
         entry ??= SelectedEntry;
         if (entry is null) return;
+        if (_ecuSession is not null)
+        {
+            try
+            {
+                await _ecuSession.OpenAsync(entry.Id);
+                _settings.Update(s => s.LastOpenedEcu = entry.Id);
+                _toasts.Success(Loc.F("Opened {0}", entry.Name));
+                _nav.NavigateTo(PageId.Screens);
+            }
+            catch (Exception ex) { _log?.LogWarning(ex, "Open ECU failed"); _toasts.Error(Loc.T("Could not open ECU"), ex.Message); }
+            return;
+        }
         _session.CurrentEcu = $"{entry.Name} ({entry.Address})";
         _settings.Update(s => s.LastOpenedEcu = entry.Id);
         _toasts.Info(Loc.F("Opened {0}", entry.Name), Loc.T("Screens will appear here once the ECU engine is connected."));

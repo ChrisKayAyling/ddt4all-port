@@ -29,11 +29,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Localization\Locales\*.json" LogicalName="Ddt4All.App.Locales.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Resources\can-addressing.json" LogicalName="Ddt4All.App.Resources.can-addressing.json" />
     <InternalsVisibleTo Include="Ddt4All.App.Tests" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Ddt4All.Core\Ddt4All.Core.csproj" />
     <ProjectReference Include="..\Ddt4All.Comms\Ddt4All.Comms.csproj" />
+    <ProjectReference Include="..\Ddt4All.Plugins\Ddt4All.Plugins.csproj" />
   </ItemGroup>
 </Project>

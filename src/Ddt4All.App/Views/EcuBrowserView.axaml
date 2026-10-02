@@ -20,8 +20,13 @@
             <!-- database warning -->
             <Border Grid.Row="1" Classes="card" Padding="12" IsVisible="{Binding DatabaseMissing}" Background="{DynamicResource WarningSoftBrush}" BorderBrush="{DynamicResource WarningBrush}">
                 <DockPanel>
-                    <Button DockPanel.Dock="Right" Classes="accent" Command="{Binding OpenSettingsCommand}" Content="{loc:Tr 'Settings'}" />
-                    <TextBlock VerticalAlignment="Center" Text="{loc:Tr 'No database found'}" />
+                    <Button DockPanel.Dock="Right" Margin="8 0 0 0" Command="{Binding OpenSettingsCommand}" Content="{loc:Tr 'Settings'}" />
+                    <Button DockPanel.Dock="Right" Classes="accent" Command="{Binding LocateDatabaseCommand}" Content="{loc:Tr 'Locate ecu.zip...'}" />
+                    <StackPanel VerticalAlignment="Center" Spacing="2">
+                        <TextBlock FontWeight="Medium" Text="{loc:Tr 'No database found'}" />
+                        <TextBlock Classes="caption" TextWrapping="Wrap" Text="{loc:Tr 'DDT4All needs the ECU database (ecu.zip). Locate it, or set its folder in Settings.'}" />
+                        <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding DatabaseError}" IsVisible="{Binding DatabaseError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
                 </DockPanel>
             </Border>
 
@@ -72,7 +77,7 @@
                     </v:EcuListBox>
                     <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4" IsVisible="{Binding IsEmpty}" IsHitTestVisible="False">
                         <PathIcon Data="{x:Static svc:Icons.Search}" Width="28" Height="28" Foreground="{DynamicResource TextMutedBrush}" />
-                        <TextBlock Classes="muted" Text="{loc:Tr 'No ECUs match your filters.'}" />
+                        <TextBlock Classes="muted" Text="{Binding EmptyText}" />
                     </StackPanel>
                 </Grid>
             </Border>

@@ -82,8 +82,8 @@ public class ScreenshotTests
         app.Screenshot("09-settings");
         app.Page<AboutViewModel>(PageId.About); await app.PumpAsync(100);
         app.Screenshot("10-about");
-        app.Page<ScreensViewModel>(PageId.Screens); await app.PumpAsync(100);
-        app.Screenshot("11-placeholder-screens");
+        app.Page<Ddt4All.App.ViewModels.Screens.ScreensViewModel>(PageId.Screens); await app.PumpAsync(100);
+        app.Screenshot("11-screens-no-ecu");
         var log = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Demo");
         log.LogInformation("Catalog loaded: 5000 entries in 12 ms");
         log.LogWarning("Adapter reported low voltage (9.8 V)");

@@ -119,6 +119,45 @@ public sealed class NamedCollection<T> : IReadOnlyList<T> where T : class, IName
     /// <summary>True if an item with that exact name exists.</summary>
     public bool Contains(string name) => _index.ContainsKey(name);
 
+    /// <summary>Position of the item with that name, or -1.</summary>
+    public int IndexOf(string name) => _index.TryGetValue(name, out int i) ? i : -1;
+
+    /// <summary>Inserts at a position (a same-named item is removed first). Used by editors.</summary>
+    public void Insert(int index, T item)
+    {
+        int old = IndexOf(item.Name);
+        if (old >= 0) { _list.RemoveAt(old); if (old < index) index--; }
+        _list.Insert(Math.Clamp(index, 0, _list.Count), item);
+        Reindex();
+    }
+
+    /// <summary>Removes by name; returns false if absent.</summary>
+    public bool Remove(string name)
+    {
+        if (!_index.TryGetValue(name, out int i)) return false;
+        _list.RemoveAt(i);
+        Reindex();
+        return true;
+    }
+
+    /// <summary>Moves an item to a new position.</summary>
+    public void Move(int from, int to)
+    {
+        if (from < 0 || from >= _list.Count) return;
+        to = Math.Clamp(to, 0, _list.Count - 1);
+        var it = _list[from];
+        _list.RemoveAt(from);
+        _list.Insert(to, it);
+        Reindex();
+    }
+
+    /// <summary>Rebuilds the name index; call after changing the <c>Name</c> of an item that is in the collection.</summary>
+    public void Reindex()
+    {
+        _index.Clear();
+        for (int i = 0; i < _list.Count; i++) _index[_list[i].Name] = i;
+    }
+
     /// <summary>Removes all items.</summary>
     public void Clear() { _list.Clear(); _index.Clear(); }
 

@@ -1,0 +1,200 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ddt4All.App.ViewModels"
+             xmlns:svc="using:Ddt4All.App.Services"
+             xmlns:loc="using:Ddt4All.App.Localization"
+             x:Class="Ddt4All.App.Views.RequestsView"
+             x:DataType="vm:RequestsViewModel">
+    <UserControl.Styles>
+        <Style Selector="Border.warnpill"><Setter Property="Background" Value="{DynamicResource WarningSoftBrush}" /></Style>
+        <Style Selector="Border.okpill"><Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}" /></Style>
+        <Style Selector="Border.errpill"><Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" /></Style>
+        <Style Selector="Border.infopill"><Setter Property="Background" Value="{DynamicResource InfoSoftBrush}" /></Style>
+        <Style Selector="TextBox.invalid"><Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" /></Style>
+    </UserControl.Styles>
+
+    <Grid>
+        <!-- no ECU loaded -->
+        <Border Classes="card" IsVisible="{Binding NoEcu}" Margin="28 24" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="40 32">
+            <StackPanel Spacing="10" Width="360">
+                <PathIcon Data="{x:Static svc:Icons.List}" Width="34" Height="34" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                <TextBlock Classes="h1" Text="{loc:Tr 'Requests'}" HorizontalAlignment="Center" />
+                <TextBlock Classes="muted" TextAlignment="Center" TextWrapping="Wrap"
+                           Text="{loc:Tr 'No ECU is loaded. Pick one in the ECU Browser, or open an ECU definition file.'}" />
+                <Button Classes="accent" HorizontalAlignment="Center" Command="{Binding OpenEcuFileCommand}" Margin="0 8 0 0">
+                    <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Data="{x:Static svc:Icons.Folder}" Width="14" Height="14" /><TextBlock Text="{loc:Tr 'Open ECU file...'}" /></StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Grid ColumnDefinitions="330,*" Margin="28 24 28 20" ColumnSpacing="16" IsVisible="{Binding HasEcu}">
+            <!-- request list -->
+            <Border Classes="card" Padding="0" ClipToBounds="True">
+                <Grid RowDefinitions="Auto,*">
+                    <StackPanel Spacing="10" Margin="14 14 14 10">
+                        <StackPanel Spacing="1">
+                            <TextBlock Classes="h1" Text="{loc:Tr 'Requests'}" />
+                            <TextBlock Classes="muted" Text="{Binding EcuTitle}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBox Text="{Binding SearchText}" PlaceholderText="{loc:Tr 'Search name or hex...'}" x:Name="SearchBox" />
+                        <ListBox Classes="segmented" SelectedIndex="{Binding FilterIndex}">
+                            <ListBoxItem Content="{loc:Tr 'All'}" />
+                            <ListBoxItem Content="{loc:Tr 'Read'}" />
+                            <ListBoxItem Content="{loc:Tr 'Write'}" />
+                        </ListBox>
+                        <TextBlock Classes="caption" Text="{Binding CountText}" />
+                    </StackPanel>
+                    <ListBox Grid.Row="1" Classes="rows" ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}" Background="Transparent" BorderThickness="0" x:Name="RequestList">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:RequestRow">
+                                <Grid Height="48" ColumnDefinitions="40,*,Auto" Margin="12 0 12 0">
+                                    <TextBlock Text="{Binding Sid}" Classes="mono" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Bytes}" Classes="mono caption" FontSize="11" />
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Classes="pill warnpill" IsVisible="{Binding IsWrite}" VerticalAlignment="Center">
+                                        <TextBlock Text="{loc:Tr 'WRITE'}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- request detail -->
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14" Margin="0 0 8 0">
+                    <Border Classes="card" IsVisible="{Binding RequestName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <StackPanel Spacing="10">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Right" Classes="pill warnpill" IsVisible="{Binding IsWriteRequest}" VerticalAlignment="Center">
+                                    <TextBlock Text="{loc:Tr 'Write request'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}" />
+                                </Border>
+                                <TextBlock Classes="h1" Text="{Binding RequestName}" TextTrimming="CharacterEllipsis" />
+                            </DockPanel>
+                            <TextBlock Classes="caption" Text="{Binding RequestInfo}" IsVisible="{Binding RequestInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="12 8">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding CopyFrameCommand}" ToolTip.Tip="{loc:Tr 'Copy'}" Padding="6">
+                                        <PathIcon Data="{x:Static svc:Icons.Copy}" Width="14" Height="14" />
+                                    </Button>
+                                    <StackPanel Spacing="1">
+                                        <TextBlock Classes="caption" Text="{loc:Tr 'Frame to send'}" />
+                                        <TextBlock Text="{Binding FrameHex}" Classes="mono" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- sent parameters -->
+                    <Border Classes="card" IsVisible="{Binding HasParams}">
+                        <StackPanel Spacing="10">
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding ResetParamsCommand}"><TextBlock Text="{loc:Tr 'Reset'}" /></Button>
+                                <TextBlock Classes="h2" Text="{loc:Tr 'Parameters sent'}" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <ItemsControl ItemsSource="{Binding Params}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ParamEditorViewModel">
+                                        <Grid ColumnDefinitions="230,*" Margin="0 4" ColumnSpacing="14">
+                                            <StackPanel VerticalAlignment="Top" Margin="0 6 0 0">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Medium" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Description}" />
+                                                <TextBlock Text="{Binding Position}" Classes="caption" FontSize="11" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Spacing="2">
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                    <ComboBox ItemsSource="{Binding Choices}" SelectedItem="{Binding Text}" HorizontalAlignment="Stretch" IsVisible="{Binding IsList}" />
+                                                    <TextBox Text="{Binding Text}" Classes.mono="{Binding IsMono}" Classes.invalid="{Binding HasError}" IsVisible="{Binding IsText}" PlaceholderText="{Binding Hint}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Unit}" IsVisible="{Binding HasUnit}" VerticalAlignment="Center" Classes="muted" MinWidth="24" />
+                                                </Grid>
+                                                <TextBlock Text="{Binding Error}" IsVisible="{Binding HasError}" Foreground="{DynamicResource DangerBrush}" FontSize="12" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- send bar -->
+                    <DockPanel IsVisible="{Binding RequestName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <Button DockPanel.Dock="Left" Classes="accent" Command="{Binding SendCommand}" MinWidth="120" Height="38">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center"><PathIcon Data="{x:Static svc:Icons.Send}" Width="14" Height="14" /><TextBlock Text="{loc:Tr 'Send'}" FontWeight="SemiBold" /></StackPanel>
+                        </Button>
+                        <Button DockPanel.Dock="Right" Command="{Binding DecodeSampleCommand}" IsVisible="{Binding HasSample}" Margin="12 0 0 0" ToolTip.Tip="{loc:Tr 'Decode the request definition sample reply without an ECU'}">
+                            <TextBlock Text="{loc:Tr 'Decode sample'}" />
+                        </Button>
+                        <TextBlock Text="{Binding SendBlockReason}" Classes="muted" VerticalAlignment="Center" Margin="14 0 0 0" TextWrapping="Wrap" />
+                    </DockPanel>
+                    <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsSending}" Height="3" />
+
+                    <!-- response -->
+                    <Border Classes="card" Padding="0" ClipToBounds="True" IsVisible="{Binding RequestName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <StackPanel>
+                            <StackPanel Margin="16 14 16 10" Spacing="8">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Right" Classes="pill" Classes.okpill="{Binding StatusIsOk}" Classes.errpill="{Binding StatusIsError}" Classes.warnpill="{Binding StatusIsPending}" IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" VerticalAlignment="Center" MaxWidth="460">
+                                        <TextBlock Text="{Binding StatusText}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                    </Border>
+                                    <TextBlock Classes="h2" Text="{loc:Tr 'Response'}" VerticalAlignment="Center" />
+                                </DockPanel>
+                                <TextBlock Text="{Binding RawResponse}" Classes="mono" FontSize="13" TextWrapping="Wrap" IsVisible="{Binding HasResponse}" />
+                            </StackPanel>
+                            <Grid Height="30" ColumnDefinitions="200,*,120,70" Background="{DynamicResource SurfaceAltBrush}" IsVisible="{Binding HasResponseRows}">
+                                <TextBlock Classes="caption" Text="{loc:Tr 'Name'}" Margin="16 0 0 0" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                <TextBlock Grid.Column="1" Classes="caption" Text="{loc:Tr 'Value'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                <TextBlock Grid.Column="2" Classes="caption" Text="{loc:Tr 'Raw'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                <TextBlock Grid.Column="3" Classes="caption" Text="{loc:Tr 'Byte'}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding Response}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ResponseRow">
+                                        <Grid MinHeight="34" ColumnDefinitions="200,*,120,70">
+                                            <TextBlock Text="{Binding Name}" Margin="16 0 8 0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Description}" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Value}" Classes="mono" FontWeight="SemiBold" Opacity="1" Classes.muted="{Binding IsMissing}" />
+                                                <TextBlock Text="{Binding Unit}" Classes="muted" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Text="{Binding Raw}" Classes="mono caption" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="3" Text="{Binding Position}" Classes="mono caption" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Classes="muted" Margin="16 4 16 14" Text="{loc:Tr 'This request does not define received data.'}" IsVisible="{Binding NoResponseRows}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- history -->
+                    <Border Classes="card" Padding="0" ClipToBounds="True" IsVisible="{Binding HasHistory}">
+                        <StackPanel>
+                            <DockPanel Margin="16 12 16 8">
+                                <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding ClearHistoryCommand}"><TextBlock Text="{loc:Tr 'Clear'}" /></Button>
+                                <TextBlock Classes="h2" Text="{loc:Tr 'History'}" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <ListBox Classes="rows" ItemsSource="{Binding History}" SelectedItem="{Binding SelectedHistory}" MaxHeight="230" Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:HistoryEntry">
+                                        <Grid Height="34" ColumnDefinitions="70,160,*,Auto" Margin="16 0">
+                                            <TextBlock Text="{Binding TimeText}" Classes="mono caption" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding RequestName}" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2" Classes="mono caption" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="8 0">
+                                                <Run Text="{Binding Sent}" /><Run Text="  →  " /><Run Text="{Binding Received}" />
+                                            </TextBlock>
+                                            <Border Grid.Column="3" Classes="pill okpill" Classes.errpill="{Binding !Ok}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Status}" FontSize="11" MaxWidth="260" TextTrimming="CharacterEllipsis" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

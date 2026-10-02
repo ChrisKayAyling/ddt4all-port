@@ -1,6 +1,10 @@
 using System.ComponentModel;
 using Ddt4All.App.Models;
+using Ddt4All.Comms;
 using Ddt4All.Core.Abstractions;
+using Ddt4All.Core.Database;
+using Ddt4All.Core.Ecu;
+using Ddt4All.Core.Layout;
 
 namespace Ddt4All.App.Services;
 
@@ -10,8 +14,20 @@ public interface IEcuCatalogService
     /// <summary>Path of the ecu.zip / ecus dir in use, or null if not found.</summary>
     string? DatabasePath { get; }
     bool IsAvailable { get; }
+    /// <summary>Why the database could not be opened (null when fine / not tried yet).</summary>
+    string? Error { get; }
+    /// <summary>The open Core database (null when unavailable or for fakes). Used by the scanner and the simulator.</summary>
+    EcuDatabase? Database { get; }
+    /// <summary>Raised (any thread) after the database path changed or the database was (re)opened.</summary>
+    event Action? Changed;
     /// <summary>Index names/ids only (cached by Core). Called off the UI thread.</summary>
     Task<EcuCatalog> LoadAsync(CancellationToken ct = default);
+    /// <summary>Points the app at another ecu.zip (persisted in the settings) and reopens it. Returns false (and sets <see cref="Error"/>) on failure.</summary>
+    Task<bool> SetDatabasePathAsync(string path, CancellationToken ct = default);
+    /// <summary>Parses one ECU definition of the database (lazy, off the UI thread). <paramref name="href"/> = <c>EcuEntry.Id</c>.</summary>
+    Task<EcuFile> LoadEcuAsync(string href, CancellationToken ct = default);
+    /// <summary>Screens of an ECU definition, or null if it has none.</summary>
+    Task<EcuLayout?> LoadLayoutAsync(string href, CancellationToken ct = default);
 }
 
 /// <summary>Adapter connection lifecycle + raw terminal I/O. Real impl lives on Ddt4All.Comms.</summary>
@@ -22,6 +38,8 @@ public interface IConnectionService : INotifyPropertyChanged
     AdapterInfo? Adapter { get; }
     /// <summary>The Core seam once connected (null otherwise).</summary>
     IEcuTransport? Transport { get; }
+    /// <summary>Same object as <see cref="Transport"/> when it can be pointed at ECUs (ELM, DoIP); null otherwise.</summary>
+    IAddressableTransport? AddressableTransport { get; }
 
     Task<IReadOnlyList<SerialPortInfo>> ListPortsAsync(CancellationToken ct = default);
     Task ConnectAsync(ConnectionRequest request, CancellationToken ct = default);

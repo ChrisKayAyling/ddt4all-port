@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Threading;
 using Ddt4All.App.Services;
+using Ddt4All.App.Services.Real;
 using Ddt4All.App.ViewModels;
 using Ddt4All.App.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,7 @@ internal static class HeadlessCheck
             App.Services = services;
             StartupTrace.Mark("services built");
             var settings = services.GetRequiredService<ISettingsService>();
+            RunEndToEnd(services, home);
             services.GetRequiredService<IThemeService>().Apply(settings.Current.Theme, settings.Current.Accent);
             var vm = services.GetRequiredService<MainWindowViewModel>();
             var w = new MainWindow(settings) { DataContext = vm };
@@ -49,5 +51,17 @@ internal static class HeadlessCheck
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); }
         return code;
+    }
+
+    /// <summary>Simulation-mode flow over the real services (needs the Core test fixtures, found next to a source checkout or via DDT4ALL_FIXTURES). Failures abort the check.</summary>
+    private static void RunEndToEnd(IServiceProvider services, string home)
+    {
+        var fixtures = EndToEndCheck.FindFixtureDir();
+        if (fixtures is null) { Console.WriteLine("e2e: skipped (ECU fixtures not found; set DDT4ALL_FIXTURES)"); return; }
+        var zip = EndToEndCheck.BuildFixtureZip(fixtures, Path.Combine(home, "e2e", "ecu.zip"));
+        // run off the UI thread (no synchronization context) so the awaits never wait for the dispatcher
+        var log = Task.Run(() => EndToEndCheck.RunAsync(services, zip)).GetAwaiter().GetResult();
+        foreach (var l in log) Console.WriteLine("e2e: " + l);
+        Console.WriteLine("e2e: OK");
     }
 }
